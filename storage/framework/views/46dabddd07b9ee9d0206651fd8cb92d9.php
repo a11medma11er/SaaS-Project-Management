@@ -1,8 +1,9 @@
-@extends('layouts.master')
-@section('title')
-    {{ $project->title }}
-@endsection
-@section('content')
+
+<?php $__env->startSection('title'); ?>
+    <?php echo e($project->title); ?>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
     <div class="row">
         <div class="col-lg-12">
             <div class="card mt-n4 mx-n4 card-border-effect-none">
@@ -14,28 +15,28 @@
                                     <div class="col-md-auto">
                                         <div class="avatar-md">
                                             <div class="avatar-title bg-white rounded-circle">
-                                                @if($project->thumbnail)
-                                                    <img src="{{ asset('storage/' . $project->thumbnail) }}" alt="" class="avatar-xs rounded-circle">
-                                                @else
-                                                    <span class="avatar-xs">{{ strtoupper(substr($project->title, 0, 2)) }}</span>
-                                                @endif
+                                                <?php if($project->thumbnail): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $project->thumbnail)); ?>" alt="" class="avatar-xs rounded-circle">
+                                                <?php else: ?>
+                                                    <span class="avatar-xs"><?php echo e(strtoupper(substr($project->title, 0, 2))); ?></span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md">
                                         <div>
-                                            <h4 class="fw-bold">{{ $project->title }}</h4>
+                                            <h4 class="fw-bold"><?php echo e($project->title); ?></h4>
                                             <div class="hstack gap-3 flex-wrap">
-                                                @if($project->category)
-                                                <div><i class="ri-building-line align-bottom me-1"></i> {{ $project->category }}</div>
+                                                <?php if($project->category): ?>
+                                                <div><i class="ri-building-line align-bottom me-1"></i> <?php echo e($project->category); ?></div>
                                                 <div class="vr"></div>
-                                                @endif
-                                                <div>Created: <span class="fw-medium">{{ $project->created_at->format('d M, Y') }}</span></div>
+                                                <?php endif; ?>
+                                                <div>Created: <span class="fw-medium"><?php echo e($project->created_at->format('d M, Y')); ?></span></div>
                                                 <div class="vr"></div>
-                                                <div>Deadline: <span class="fw-medium">{{ $project->deadline->format('d M, Y') }}</span></div>
+                                                <div>Deadline: <span class="fw-medium"><?php echo e($project->deadline->format('d M, Y')); ?></span></div>
                                                 <div class="vr"></div>
-                                                <div class="badge rounded-pill bg-{{ $project->status == 'Completed' ? 'success' : ($project->status == 'On Hold' ? 'warning' : 'info') }} fs-12">{{ $project->status }}</div>
-                                                <div class="badge rounded-pill bg-{{ $project->priority == 'High' ? 'danger' : ($project->priority == 'Low' ? 'success' : 'warning') }} fs-12">{{ $project->priority }}</div>
+                                                <div class="badge rounded-pill bg-<?php echo e($project->status == 'Completed' ? 'success' : ($project->status == 'On Hold' ? 'warning' : 'info')); ?> fs-12"><?php echo e($project->status); ?></div>
+                                                <div class="badge rounded-pill bg-<?php echo e($project->priority == 'High' ? 'danger' : ($project->priority == 'Low' ? 'success' : 'warning')); ?> fs-12"><?php echo e($project->priority); ?></div>
                                             </div>
                                         </div>
                                     </div>
@@ -43,26 +44,26 @@
                             </div>
                             <div class="col-md-auto">
                                 <div class="hstack gap-1 flex-wrap">
-                                    <button type="button" class="btn py-0 fs-16 favourite-btn {{ $project->is_favorite ? 'active' : '' }}" data-project-id="{{ $project->id }}">
+                                    <button type="button" class="btn py-0 fs-16 favourite-btn <?php echo e($project->is_favorite ? 'active' : ''); ?>" data-project-id="<?php echo e($project->id); ?>">
                                         <i class="ri-star-fill"></i>
                                     </button>
-                                    @can('edit-projects')
-                                    <a href="{{ route('management.projects.edit', $project->id) }}" class="btn py-0 fs-16 text-body">
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-projects')): ?>
+                                    <a href="<?php echo e(route('management.projects.edit', $project->id)); ?>" class="btn py-0 fs-16 text-body">
                                         <i class="ri-pencil-line"></i>
                                     </a>
-                                    @endcan
-                                    @can('delete-projects')
+                                    <?php endif; ?>
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-projects')): ?>
                                     <button type="button" class="btn py-0 fs-16 text-body" onclick="event.preventDefault(); 
-                                        if(confirm('Are you sure?')) document.getElementById('delete-form-{{ $project->id }}').submit();">
+                                        if(confirm('Are you sure?')) document.getElementById('delete-form-<?php echo e($project->id); ?>').submit();">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
-                                    <form id="delete-form-{{ $project->id }}" 
-                                        action="{{ route('management.projects.destroy', $project->id) }}" 
+                                    <form id="delete-form-<?php echo e($project->id); ?>" 
+                                        action="<?php echo e(route('management.projects.destroy', $project->id)); ?>" 
                                         method="POST" style="display: none;">
-                                        @csrf
-                                        @method('DELETE')
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
                                     </form>
-                                    @endcan
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -109,18 +110,18 @@
                                 <div class="card-body">
                                     <div class="text-muted">
                                         <h6 class="mb-3 fw-semibold text-uppercase">Summary</h6>
-                                        <div>{!! $project->description !!}</div>
+                                        <div><?php echo $project->description; ?></div>
 
-                                        @if($project->skills && count($project->skills) > 0)
+                                        <?php if($project->skills && count($project->skills) > 0): ?>
                                         <div class="pt-3 border-top border-top-dashed mt-4">
                                             <h6 class="mb-3 fw-semibold text-uppercase">Skills</h6>
                                             <div class="d-flex flex-wrap gap-2 fs-15">
-                                                @foreach($project->skills as $skill)
-                                                    <span class="badge bg-primary-subtle text-primary">{{ $skill }}</span>
-                                                @endforeach
+                                                <?php $__currentLoopData = $project->skills; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $skill): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <span class="badge bg-primary-subtle text-primary"><?php echo e($skill); ?></span>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
                                         </div>
-                                        @endif
+                                        <?php endif; ?>
 
 
                                         <div class="pt-3 border-top border-top-dashed mt-4">
@@ -129,25 +130,25 @@
                                                 <div class="col-lg-3 col-sm-6">
                                                     <div>
                                                         <p class="mb-2 text-uppercase fw-medium">Create Date :</p>
-                                                        <h5 class="fs-15 mb-0">{{ $project->created_at->format('d M, Y') }}</h5>
+                                                        <h5 class="fs-15 mb-0"><?php echo e($project->created_at->format('d M, Y')); ?></h5>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-3 col-sm-6">
                                                     <div>
                                                         <p class="mb-2 text-uppercase fw-medium">Deadline :</p>
-                                                        <h5 class="fs-15 mb-0">{{ $project->deadline->format('d M, Y') }}</h5>
+                                                        <h5 class="fs-15 mb-0"><?php echo e($project->deadline->format('d M, Y')); ?></h5>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-3 col-sm-6">
                                                     <div>
                                                         <p class="mb-2 text-uppercase fw-medium">Priority :</p>
-                                                        <div class="badge bg-{{ $project->priority == 'High' ? 'danger' : ($project->priority == 'Low' ? 'success' : 'warning') }} fs-12">{{ $project->priority }}</div>
+                                                        <div class="badge bg-<?php echo e($project->priority == 'High' ? 'danger' : ($project->priority == 'Low' ? 'success' : 'warning')); ?> fs-12"><?php echo e($project->priority); ?></div>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-3 col-sm-6">
                                                     <div>
                                                         <p class="mb-2 text-uppercase fw-medium">Status :</p>
-                                                        <div class="badge bg-{{ $project->status == 'Completed' ? 'success' : ($project->status == 'On Hold' ? 'warning' : 'info') }} fs-12">{{ $project->status }}</div>
+                                                        <div class="badge bg-<?php echo e($project->status == 'Completed' ? 'success' : ($project->status == 'On Hold' ? 'warning' : 'info')); ?> fs-12"><?php echo e($project->status); ?></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -277,7 +278,7 @@
                                     <div data-simplebar style="height: 300px;" class="px-3 mx-n3 mb-2">
                                         <div class="d-flex mb-4">
                                             <div class="flex-shrink-0">
-                                                <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt=""
                                                     class="avatar-xs rounded-circle" />
                                             </div>
                                             <div class="flex-grow-1 ms-3">
@@ -289,7 +290,7 @@
                                                         class="mdi mdi-reply"></i> Reply</a>
                                                 <div class="d-flex mt-4">
                                                     <div class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt=""
                                                             class="avatar-xs rounded-circle" />
                                                     </div>
                                                     <div class="flex-grow-1 ms-3">
@@ -306,7 +307,7 @@
                                         </div>
                                         <div class="d-flex mb-4">
                                             <div class="flex-shrink-0">
-                                                <img src="{{ URL::asset('build/images/users/avatar-6.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>" alt=""
                                                     class="avatar-xs rounded-circle" />
                                             </div>
                                             <div class="flex-grow-1 ms-3">
@@ -322,7 +323,7 @@
                                         </div>
                                         <div class="d-flex">
                                             <div class="flex-shrink-0">
-                                                <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt=""
                                                     class="avatar-xs rounded-circle" />
                                             </div>
                                             <div class="flex-grow-1 ms-3">
@@ -335,11 +336,11 @@
                                                     Support and more.</p>
                                                 <div class="row g-2 mb-3">
                                                     <div class="col-lg-1 col-sm-2 col-6">
-                                                        <img src="{{ URL::asset('build/images/small/img-4.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/small/img-4.jpg')); ?>" alt=""
                                                             class="img-fluid rounded">
                                                     </div>
                                                     <div class="col-lg-1 col-sm-2 col-6">
-                                                        <img src="{{ URL::asset('build/images/small/img-5.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/small/img-5.jpg')); ?>" alt=""
                                                             class="img-fluid rounded">
                                                     </div>
                                                 </div>
@@ -347,7 +348,7 @@
                                                         class="mdi mdi-reply"></i> Reply</a>
                                                 <div class="d-flex mt-4">
                                                     <div class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-6.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>" alt=""
                                                             class="avatar-xs rounded-circle" />
                                                     </div>
                                                     <div class="flex-grow-1 ms-3">
@@ -388,53 +389,55 @@
                             <div class="card">
                                 <div class="card-header align-items-center d-flex border-bottom-dashed">
                                     <h4 class="card-title mb-0 flex-grow-1">Members</h4>
-                                    @can('edit-projects')
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-projects')): ?>
                                     <div class="flex-shrink-0">
-                                        <a href="{{ route('management.projects.edit', $project->id) }}" class="btn btn-soft-primary btn-sm">
+                                        <a href="<?php echo e(route('management.projects.edit', $project->id)); ?>" class="btn btn-soft-primary btn-sm">
                                             Edit
                                         </a>
                                     </div>
-                                    @endcan
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="card-body">
                                     <div data-simplebar style="max-height: 235px;" class="mx-n3 px-3">
                                         <div class="vstack gap-3">
-                                            @if($project->teamLead)
+                                            <?php if($project->teamLead): ?>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                                    @if($project->teamLead->avatar)
-                                                        <img src="{{ asset('storage/' . $project->teamLead->avatar) }}" alt="" class="img-fluid rounded-circle">
-                                                    @else
+                                                    <?php if($project->teamLead->avatar): ?>
+                                                        <img src="<?php echo e(asset('storage/' . $project->teamLead->avatar)); ?>" alt="" class="img-fluid rounded-circle">
+                                                    <?php else: ?>
                                                         <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                            {{ strtoupper(substr($project->teamLead->name, 0, 1)) }}
+                                                            <?php echo e(strtoupper(substr($project->teamLead->name, 0, 1))); ?>
+
                                                         </div>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h5 class="fs-13 mb-0">{{ $project->teamLead->name }}</h5>
+                                                    <h5 class="fs-13 mb-0"><?php echo e($project->teamLead->name); ?></h5>
                                                     <small class="text-muted">Team Lead</small>
                                                 </div>
                                             </div>
-                                            @endif
+                                            <?php endif; ?>
 
-                                            @foreach($project->members as $member)
+                                            <?php $__currentLoopData = $project->members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                                    @if($member->avatar)
-                                                        <img src="{{ asset('storage/' . $member->avatar) }}" alt="" class="img-fluid rounded-circle">
-                                                    @else
+                                                    <?php if($member->avatar): ?>
+                                                        <img src="<?php echo e(asset('storage/' . $member->avatar)); ?>" alt="" class="img-fluid rounded-circle">
+                                                    <?php else: ?>
                                                         <div class="avatar-title bg-success-subtle text-success rounded-circle">
-                                                            {{ strtoupper(substr($member->name, 0, 1)) }}
+                                                            <?php echo e(strtoupper(substr($member->name, 0, 1))); ?>
+
                                                         </div>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h5 class="fs-13 mb-0">{{ $member->name }}</h5>
-                                                    <small class="text-muted">{{ $member->pivot->role ?? 'Member' }}</small>
+                                                    <h5 class="fs-13 mb-0"><?php echo e($member->name); ?></h5>
+                                                    <small class="text-muted"><?php echo e($member->pivot->role ?? 'Member'); ?></small>
                                                 </div>
                                             </div>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
                                     </div>
                                 </div>
@@ -452,31 +455,32 @@
                                                 <p class="text-muted mb-0">Progress</p>
                                             </div>
                                             <div class="flex-shrink-0">
-                                                <span class="text-muted">{{ $project->progress }}%</span>
+                                                <span class="text-muted"><?php echo e($project->progress); ?>%</span>
                                             </div>
                                         </div>
                                         <div class="progress progress-sm">
                                             <div class="progress-bar bg-primary" role="progressbar" 
-                                                style="width: {{ $project->progress }}%" 
-                                                aria-valuenow="{{ $project->progress }}" aria-valuemin="0" aria-valuemax="100">
+                                                style="width: <?php echo e($project->progress); ?>%" 
+                                                aria-valuenow="<?php echo e($project->progress); ?>" aria-valuemin="0" aria-valuemax="100">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <p class="text-muted text-uppercase fw-semibold mb-2">Privacy</p>
-                                        <span class="badge bg-{{ $project->privacy == 'Public' ? 'success' : ($project->privacy == 'Private' ? 'danger' : 'warning') }}-subtle text-{{ $project->privacy == 'Public' ? 'success' : ($project->privacy == 'Private' ? 'danger' : 'warning') }}">
-                                            {{ $project->privacy }}
+                                        <span class="badge bg-<?php echo e($project->privacy == 'Public' ? 'success' : ($project->privacy == 'Private' ? 'danger' : 'warning')); ?>-subtle text-<?php echo e($project->privacy == 'Public' ? 'success' : ($project->privacy == 'Private' ? 'danger' : 'warning')); ?>">
+                                            <?php echo e($project->privacy); ?>
+
                                         </span>
                                     </div>
-                                    @if($project->start_date)
+                                    <?php if($project->start_date): ?>
                                     <div class="mb-3">
                                         <p class="text-muted text-uppercase fw-semibold mb-2">Start Date</p>
-                                        <h6 class="fs-14 mb-0">{{ $project->start_date->format('d M, Y') }}</h6>
+                                        <h6 class="fs-14 mb-0"><?php echo e($project->start_date->format('d M, Y')); ?></h6>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                     <div>
                                         <p class="text-muted text-uppercase fw-semibold mb-2">Total Members</p>
-                                        <h6 class="fs-14 mb-0">{{ $project->members->count() + ($project->teamLead ? 1 : 0) }}</h6>
+                                        <h6 class="fs-14 mb-0"><?php echo e($project->members->count() + ($project->teamLead ? 1 : 0)); ?></h6>
                                     </div>
                                 </div>
                             </div>
@@ -487,34 +491,32 @@
                                 </div>
 
                                 <div class="card-body">
-                                    @if($project->attachments->count() > 0)
+                                    <?php if($project->attachments->count() > 0): ?>
                                     <div class="vstack gap-2">
-                                        @foreach($project->attachments as $attachment)
+                                        <?php $__currentLoopData = $project->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attachment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="border rounded border-dashed p-2">
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar-sm">
                                                         <div class="avatar-title bg-light text-primary rounded fs-24">
-                                                            <i class="{{ 
-                                                                str_contains($attachment->file_path, '.pdf') ? 'ri-file-pdf-line' :
+                                                            <i class="<?php echo e(str_contains($attachment->file_path, '.pdf') ? 'ri-file-pdf-line' :
                                                                 (str_contains($attachment->file_path, '.zip') ? 'ri-folder-zip-line' :
                                                                 (str_contains($attachment->file_path, '.doc') ? 'ri-file-word-line' :
-                                                                'ri-file-line'))
-                                                            }}"></i>
+                                                                'ri-file-line'))); ?>"></i>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1 overflow-hidden">
                                                     <h5 class="fs-13 mb-1">
-                                                        <a href="{{ asset('storage/' . $attachment->file_path) }}" 
+                                                        <a href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" 
                                                            class="text-body text-truncate d-block" 
-                                                           download>{{ basename($attachment->file_path) }}</a>
+                                                           download><?php echo e(basename($attachment->file_path)); ?></a>
                                                     </h5>
-                                                    <div>{{ $attachment->file_size }}</div>
+                                                    <div><?php echo e($attachment->file_size); ?></div>
                                                 </div>
                                                 <div class="flex-shrink-0 ms-2">
                                                     <div class="d-flex gap-1">
-                                                        <a href="{{ asset('storage/' . $attachment->file_path) }}" 
+                                                        <a href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" 
                                                            class="btn btn-icon text-muted btn-sm fs-18" 
                                                            download>
                                                             <i class="ri-download-2-line"></i>
@@ -523,14 +525,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
-                                    @else
+                                    <?php else: ?>
                                     <div class="text-center text-muted py-4">
                                         <i class="ri-file-line fs-1 mb-2"></i>
                                         <p class="mb-0">No attachments yet</p>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <!-- end card -->
@@ -825,7 +827,7 @@
                             <div class="acitivity-timeline py-3">
                                 <div class="acitivity-item d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ URL::asset('build/images/users/avatar-1.jpg') }}" alt=""
+                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-1.jpg')); ?>" alt=""
                                             class="avatar-xs rounded-circle acitivity-avatar" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
@@ -851,13 +853,13 @@
                                             <a href="javascript: void(0);" class="avatar-group-item"
                                                 data-bs-toggle="tooltip" data-bs-placement="top" title=""
                                                 data-bs-original-title="Christi">
-                                                <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt=""
                                                     class="rounded-circle avatar-xs" />
                                             </a>
                                             <a href="javascript: void(0);" class="avatar-group-item"
                                                 data-bs-toggle="tooltip" data-bs-placement="top" title=""
                                                 data-bs-original-title="Frank Hook">
-                                                <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt=""
                                                     class="rounded-circle avatar-xs" />
                                             </a>
                                             <a href="javascript: void(0);" class="avatar-group-item"
@@ -884,7 +886,7 @@
                                 </div>
                                 <div class="acitivity-item py-3 d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt=""
+                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt=""
                                             class="avatar-xs rounded-circle acitivity-avatar" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
@@ -896,17 +898,17 @@
                                             <div class="col-xxl-4">
                                                 <div class="row border border-dashed gx-2 p-2 mb-2">
                                                     <div class="col-4">
-                                                        <img src="{{ URL::asset('build/images/small/img-2.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/small/img-2.jpg')); ?>" alt=""
                                                             class="img-fluid rounded" />
                                                     </div>
                                                     <!--end col-->
                                                     <div class="col-4">
-                                                        <img src="{{ URL::asset('build/images/small/img-3.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/small/img-3.jpg')); ?>" alt=""
                                                             class="img-fluid rounded" />
                                                     </div>
                                                     <!--end col-->
                                                     <div class="col-4">
-                                                        <img src="{{ URL::asset('build/images/small/img-4.jpg') }}" alt=""
+                                                        <img src="<?php echo e(URL::asset('build/images/small/img-4.jpg')); ?>" alt=""
                                                             class="img-fluid rounded" />
                                                     </div>
                                                     <!--end col-->
@@ -919,7 +921,7 @@
                                 </div>
                                 <div class="acitivity-item py-3 d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ URL::asset('build/images/users/avatar-6.jpg') }}" alt=""
+                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>" alt=""
                                             class="avatar-xs rounded-circle acitivity-avatar" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
@@ -947,7 +949,7 @@
                                 </div>
                                 <div class="acitivity-item py-3 d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}" alt=""
+                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt=""
                                             class="avatar-xs rounded-circle acitivity-avatar" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
@@ -975,7 +977,7 @@
                                 </div>
                                 <div class="acitivity-item d-flex">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt=""
+                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt=""
                                             class="avatar-xs rounded-circle acitivity-avatar" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
@@ -1049,7 +1051,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1182,7 +1184,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1248,7 +1250,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1381,7 +1383,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1514,7 +1516,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1580,7 +1582,7 @@
                                     <div class="col-lg-4 col">
                                         <div class="team-profile-img">
                                             <div class="avatar-lg img-thumbnail rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/avatar-5.jpg') }}" alt=""
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-5.jpg')); ?>" alt=""
                                                     class="img-fluid d-block rounded-circle" />
                                             </div>
                                             <div class="team-content">
@@ -1733,7 +1735,7 @@
                             <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip"
                                 data-bs-trigger="hover" data-bs-placement="top" title="Brent Gonzalez">
                                 <div class="avatar-xs">
-                                    <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}" alt="" class="rounded-circle img-fluid">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt="" class="rounded-circle img-fluid">
                                 </div>
                             </a>
                             <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip"
@@ -1747,7 +1749,7 @@
                             <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip"
                                 data-bs-trigger="hover" data-bs-placement="top" title="Ellen Smith">
                                 <div class="avatar-xs">
-                                    <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}" alt="" class="rounded-circle img-fluid">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt="" class="rounded-circle img-fluid">
                                 </div>
                             </a>
                         </div>
@@ -1756,7 +1758,7 @@
                         <div class="vstack gap-3">
                             <div class="d-flex align-items-center">
                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                    <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="fs-13 mb-0"><a href="#" class="text-body d-block">Nancy Martino</a>
@@ -1784,7 +1786,7 @@
                             <!-- end member item -->
                             <div class="d-flex align-items-center">
                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                    <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="fs-13 mb-0"><a href="#" class="text-body d-block">Frank Hook</a></h5>
@@ -1796,7 +1798,7 @@
                             <!-- end member item -->
                             <div class="d-flex align-items-center">
                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                    <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="fs-13 mb-0"><a href="#" class="text-body d-block">Jennifer Carter</a>
@@ -1824,7 +1826,7 @@
                             <!-- end member item -->
                             <div class="d-flex align-items-center">
                                 <div class="avatar-xs flex-shrink-0 me-3">
-                                    <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="fs-13 mb-0"><a href="#" class="text-body d-block">Joseph Parker</a>
@@ -1849,9 +1851,9 @@
         <!-- modal-dialog -->
     </div>
     <!-- end modal -->
-@endsection
-@section('script')
-    <script src="{{ URL::asset('build/js/pages/project-overview.init.js') }}"></script>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
+    <script src="<?php echo e(URL::asset('build/js/pages/project-overview.init.js')); ?>"></script>
     <script>
         // Favorite toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -1879,5 +1881,7 @@
             }
         });
     </script>
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\work\my projects\Git\Project-Management\resources\views/apps-projects-overview.blade.php ENDPATH**/ ?>

@@ -40,6 +40,15 @@ Route::middleware(['auth'])->prefix('management')->name('management.')->group(fu
     Route::middleware('can:view-permissions')->group(function () {
         Route::resource('permissions', App\Http\Controllers\Management\PermissionController::class);
     });
+    
+    // Projects Management
+    Route::middleware('can:view-projects')->group(function () {
+        // Toggle favorite BEFORE resource to avoid route conflict
+        Route::post('projects/{project}/toggle-favorite', [App\Http\Controllers\Management\ProjectController::class, 'toggleFavorite'])
+            ->name('projects.toggleFavorite');
+        
+        Route::resource('projects', App\Http\Controllers\Management\ProjectController::class);
+    });
 });
 
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');

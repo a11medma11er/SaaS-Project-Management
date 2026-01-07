@@ -1,77 +1,121 @@
-@extends('layouts.master')
-@section('title')
-    {{ isset($project) ? 'Edit Project' : 'Create Project' }}
-@endsection
-@section('css')
-    <link href="{{ URL::asset('build/libs/dropzone/dropzone.css') }}" rel="stylesheet">
-@endsection
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+
+<?php $__env->startSection('title'); ?>
+    <?php echo e(isset($project) ? 'Edit Project' : 'Create Project'); ?>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('build/libs/dropzone/dropzone.css')); ?>" rel="stylesheet">
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Project
-        @endslot
-        @slot('title')
-            {{ isset($project) ? 'Edit Project' : 'Create Project' }}
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
+            <?php echo e(isset($project) ? 'Edit Project' : 'Create Project'); ?>
+
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
     
-    @if($errors->any())
+    <?php if($errors->any()): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <strong>Validation Errors:</strong>
         <ul class="mb-0">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
+            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <li><?php echo e($error); ?></li>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    <form action="{{ isset($project) ? route('management.projects.update', $project->id) : route('management.projects.store') }}" 
+    <form action="<?php echo e(isset($project) ? route('management.projects.update', $project->id) : route('management.projects.store')); ?>" 
           method="POST" enctype="multipart/form-data">
-        @csrf
-        @if(isset($project))
-            @method('PUT')
-        @endif
+        <?php echo csrf_field(); ?>
+        <?php if(isset($project)): ?>
+            <?php echo method_field('PUT'); ?>
+        <?php endif; ?>
     <div class="row">
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label" for="project-title-input">Project Title</label>
-                        <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                        <input type="text" class="form-control <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="project-title-input" name="title" 
-                               value="{{ old('title', $project->title ?? '') }}" 
+                               value="<?php echo e(old('title', $project->title ?? '')); ?>" 
                                placeholder="Enter project title" required>
-                        @error('title')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
 
                     <div class="mb-3">
                         <label class="form-label" for="project-thumbnail-img">Thumbnail Image</label>
-                        @if(isset($project) && $project->thumbnail)
+                        <?php if(isset($project) && $project->thumbnail): ?>
                             <div class="mb-2">
-                                <img src="{{ asset('storage/' . $project->thumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-width: 200px;">
+                                <img src="<?php echo e(asset('storage/' . $project->thumbnail)); ?>" alt="Current thumbnail" class="img-thumbnail" style="max-width: 200px;">
                                 <p class="text-muted mt-1">Current thumbnail (upload new to replace)</p>
                             </div>
-                        @endif
-                        <input class="form-control @error('thumbnail') is-invalid @enderror" 
+                        <?php endif; ?>
+                        <input class="form-control <?php $__errorArgs = ['thumbnail'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="project-thumbnail-img" name="thumbnail" type="file"
                                accept="image/png, image/gif, image/jpeg, image/jpg, image/webp">
-                        @error('thumbnail')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['thumbnail'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
 
                     <div class="mb-3">
                         <label class="form-label">Project Description</label>
-                        <textarea id="ckeditor-classic" name="description" class="form-control @error('description') is-invalid @enderror">{{ old('description', $project->description ?? '') }}</textarea>
-                        @error('description')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
+                        <textarea id="ckeditor-classic" name="description" class="form-control <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"><?php echo e(old('description', $project->description ?? '')); ?></textarea>
+                        <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
 
@@ -79,41 +123,83 @@
                         <div class="col-lg-4">
                             <div class="mb-3 mb-lg-0">
                                 <label for="choices-priority-input" class="form-label">Priority</label>
-                                <select class="form-select @error('priority') is-invalid @enderror" name="priority" data-choices data-choices-search-false
+                                <select class="form-select <?php $__errorArgs = ['priority'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="priority" data-choices data-choices-search-false
                                     id="choices-priority-input">
-                                    <option value="High" {{ old('priority', $project->priority ?? 'Medium') == 'High' ? 'selected' : '' }}>High</option>
-                                    <option value="Medium" {{ old('priority', $project->priority ?? 'Medium') == 'Medium' ? 'selected' : '' }}>Medium</option>
-                                    <option value="Low" {{ old('priority', $project->priority ?? 'Medium') == 'Low' ? 'selected' : '' }}>Low</option>
+                                    <option value="High" <?php echo e(old('priority', $project->priority ?? 'Medium') == 'High' ? 'selected' : ''); ?>>High</option>
+                                    <option value="Medium" <?php echo e(old('priority', $project->priority ?? 'Medium') == 'Medium' ? 'selected' : ''); ?>>Medium</option>
+                                    <option value="Low" <?php echo e(old('priority', $project->priority ?? 'Medium') == 'Low' ? 'selected' : ''); ?>>Low</option>
                                 </select>
-                                @error('priority')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['priority'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div class="mb-3 mb-lg-0">
                                 <label for="choices-status-input" class="form-label">Status</label>
-                                <select class="form-select @error('status') is-invalid @enderror" name="status" data-choices data-choices-search-false
+                                <select class="form-select <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="status" data-choices data-choices-search-false
                                     id="choices-status-input">
-                                    <option value="Inprogress" {{ old('status', $project->status ?? 'Inprogress') == 'Inprogress' ? 'selected' : '' }}>Inprogress</option>
-                                    <option value="Completed" {{ old('status', $project->status ?? 'Inprogress') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="On Hold" {{ old('status', $project->status ?? 'Inprogress') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
+                                    <option value="Inprogress" <?php echo e(old('status', $project->status ?? 'Inprogress') == 'Inprogress' ? 'selected' : ''); ?>>Inprogress</option>
+                                    <option value="Completed" <?php echo e(old('status', $project->status ?? 'Inprogress') == 'Completed' ? 'selected' : ''); ?>>Completed</option>
+                                    <option value="On Hold" <?php echo e(old('status', $project->status ?? 'Inprogress') == 'On Hold' ? 'selected' : ''); ?>>On Hold</option>
                                 </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div>
                                 <label for="datepicker-deadline-input" class="form-label">Deadline</label>
-                                <input type="date" class="form-control @error('deadline') is-invalid @enderror" 
+                                <input type="date" class="form-control <?php $__errorArgs = ['deadline'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                        id="datepicker-deadline-input" name="deadline"
-                                       value="{{ old('deadline', isset($project) ? $project->deadline->format('Y-m-d') : '') }}" 
+                                       value="<?php echo e(old('deadline', isset($project) ? $project->deadline->format('Y-m-d') : '')); ?>" 
                                        required>
-                                @error('deadline')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['deadline'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </div>
@@ -174,9 +260,9 @@
             </div>
             <!-- end card -->
             <div class="text-end mb-4">
-                <a href="{{ route('management.projects.index') }}" class="btn btn-secondary w-sm me-1">Cancel</a>
+                <a href="<?php echo e(route('management.projects.index')); ?>" class="btn btn-secondary w-sm me-1">Cancel</a>
                 <button type="submit" class="btn btn-primary w-sm">
-                    {{ isset($project) ? 'Update' : 'Create' }} Project
+                    <?php echo e(isset($project) ? 'Update' : 'Create'); ?> Project
                 </button>
             </div>
         </div>
@@ -189,15 +275,29 @@
                 <div class="card-body">
                     <div>
                         <label for="choices-privacy-status-input" class="form-label">Status</label>
-                        <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" data-choices data-choices-search-false
+                        <select class="form-select <?php $__errorArgs = ['privacy'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="privacy" data-choices data-choices-search-false
                             id="choices-privacy-status-input">
-                            <option value="Private" {{ old('privacy', $project->privacy ?? 'Team') == 'Private' ? 'selected' : '' }}>Private</option>
-                            <option value="Team" {{ old('privacy', $project->privacy ?? 'Team') == 'Team' ? 'selected' : '' }}>Team</option>
-                            <option value="Public" {{ old('privacy', $project->privacy ?? 'Team') == 'Public' ? 'selected' : '' }}>Public</option>
+                            <option value="Private" <?php echo e(old('privacy', $project->privacy ?? 'Team') == 'Private' ? 'selected' : ''); ?>>Private</option>
+                            <option value="Team" <?php echo e(old('privacy', $project->privacy ?? 'Team') == 'Team' ? 'selected' : ''); ?>>Team</option>
+                            <option value="Public" <?php echo e(old('privacy', $project->privacy ?? 'Team') == 'Public' ? 'selected' : ''); ?>>Public</option>
                         </select>
-                        @error('privacy')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['privacy'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <!-- end card body -->
@@ -211,24 +311,52 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="choices-categories-input" class="form-label">Category</label>
-                        <input type="text" class="form-control @error('category') is-invalid @enderror" 
+                        <input type="text" class="form-control <?php $__errorArgs = ['category'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="choices-categories-input" name="category"
-                               value="{{ old('category', $project->category ?? '') }}" 
+                               value="<?php echo e(old('category', $project->category ?? '')); ?>" 
                                placeholder="e.g., Designing, Development">
-                        @error('category')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['category'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div>
                         <label for="choices-text-input" class="form-label">Skills</label>
-                        <input class  ="form-control @error('skills') is-invalid @enderror" id="choices-text-input" 
+                        <input class  ="form-control <?php $__errorArgs = ['skills'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" id="choices-text-input" 
                                name="skills" placeholder="Enter Skills (comma separated)" type="text"
-                               value="{{ old('skills', isset($project) && is_array($project->skills) ? implode(', ', $project->skills) : '') }}" />
+                               value="<?php echo e(old('skills', isset($project) && is_array($project->skills) ? implode(', ', $project->skills) : '')); ?>" />
                         <small class="text-muted">Separate skills with commas</small>
-                        @error('skills')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['skills'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <!-- end card body -->
@@ -242,40 +370,56 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="choices-lead-input" class="form-label">Team Lead</label>
-                        <select class="form-select @error('team_lead_id') is-invalid @enderror" name="team_lead_id" data-choices data-choices-search-false id="choices-lead-input">
+                        <select class="form-select <?php $__errorArgs = ['team_lead_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="team_lead_id" data-choices data-choices-search-false id="choices-lead-input">
                             <option value="">No Team Lead</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ old('team_lead_id', $project->team_lead_id ?? '') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
+                            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($user->id); ?>" <?php echo e(old('team_lead_id', $project->team_lead_id ?? '') == $user->id ? 'selected' : ''); ?>>
+                                    <?php echo e($user->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('team_lead_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['team_lead_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
 
                     <div>
                         <label class="form-label">Team Members</label>
                         <div class="avatar-group" id="selected-members-display">
-                            @if(isset($project) && $project->members->count() > 0)
-                                @foreach($project->members as $member)
+                            <?php if(isset($project) && $project->members->count() > 0): ?>
+                                <?php $__currentLoopData = $project->members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <a href="javascript: void(0);" class="avatar-group-item member-avatar" 
-                                       data-member-id="{{ $member->id }}" data-bs-toggle="tooltip"
-                                       data-bs-trigger="hover" data-bs-placement="top" title="{{ $member->name }}">
+                                       data-member-id="<?php echo e($member->id); ?>" data-bs-toggle="tooltip"
+                                       data-bs-trigger="hover" data-bs-placement="top" title="<?php echo e($member->name); ?>">
                                         <div class="avatar-xs">
-                                            @if($member->avatar)
-                                                <img src="{{ asset('storage/' . $member->avatar) }}" alt="" class="rounded-circle img-fluid">
-                                            @else
+                                            <?php if($member->avatar): ?>
+                                                <img src="<?php echo e(asset('storage/' . $member->avatar)); ?>" alt="" class="rounded-circle img-fluid">
+                                            <?php else: ?>
                                                 <div class="avatar-title rounded-circle bg-primary">
-                                                    {{ strtoupper(substr($member->name, 0, 1)) }}
+                                                    <?php echo e(strtoupper(substr($member->name, 0, 1))); ?>
+
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </a>
-                                @endforeach
-                            @endif
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endif; ?>
                             <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip"
                                 data-bs-trigger="hover" data-bs-placement="top" title="Add Members">
                                 <div class="avatar-xs" data-bs-toggle="modal" data-bs-target="#inviteMembersModal">
@@ -286,11 +430,11 @@
                             </a>
                         </div>
                         <div id="selected-members-inputs">
-                            @if(isset($project) && $project->members->count() > 0)
-                                @foreach($project->members as $member)
-                                    <input type="checkbox" name="members[]" value="{{ $member->id }}" checked style="display: none;">
-                                @endforeach
-                            @endif
+                            <?php if(isset($project) && $project->members->count() > 0): ?>
+                                <?php $__currentLoopData = $project->members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <input type="checkbox" name="members[]" value="<?php echo e($member->id); ?>" checked style="display: none;">
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -347,10 +491,10 @@
         <!-- modal-dialog -->
     </div>
     <!-- end modal -->
-@endsection
-@section('script')
-    <script src="{{ URL::asset('build/libs/@ckeditor/ckeditor5-build-classic/build/ckeditor.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/dropzone/dropzone-min.js') }}"></script>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
+    <script src="<?php echo e(URL::asset('build/libs/@ckeditor/ckeditor5-build-classic/build/ckeditor.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/dropzone/dropzone-min.js')); ?>"></script>
     <script>
         // CKEditor initialization
         ClassicEditor
@@ -369,12 +513,12 @@
             const memberSearch = document.getElementById('member-search');
 
             // Load existing members
-            @if(isset($project) && $project->members->count() > 0)
-                @foreach($project->members as $member)
-                    selectedMembers.add({{ $member->id }});
-                @endforeach
+            <?php if(isset($project) && $project->members->count() > 0): ?>
+                <?php $__currentLoopData = $project->members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    selectedMembers.add(<?php echo e($member->id); ?>);
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 updateModalDisplay();
-            @endif
+            <?php endif; ?>
 
             // Add member button click
             document.querySelectorAll('.add-member-btn').forEach(btn => {
@@ -501,5 +645,7 @@
             });
         });
     </script>
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\work\my projects\Git\Project-Management\resources\views/apps-projects-create.blade.php ENDPATH**/ ?>

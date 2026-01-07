@@ -70,6 +70,7 @@
                 <?php endif; ?>
 
                 <!-- Projects Section -->
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-projects')): ?>
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarProjects" data-bs-toggle="collapse" role="button"
                         aria-expanded="false" aria-controls="sidebarProjects">
@@ -78,23 +79,21 @@
                     <div class="collapse menu-dropdown" id="sidebarProjects">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="apps-projects-list" class="nav-link">
-                                    <i class="ri-list-check me-1"></i> List
+                                <a href="<?php echo e(route('management.projects.index')); ?>" class="nav-link">
+                                    <i class="ri-list-check me-1"></i> All Projects
                                 </a>
                             </li>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create-projects')): ?>
                             <li class="nav-item">
-                                <a href="apps-projects-overview" class="nav-link">
-                                    <i class="ri-eye-line me-1"></i> Overview
+                                <a href="<?php echo e(route('management.projects.create')); ?>" class="nav-link">
+                                    <i class="ri-add-line me-1"></i> Create Project
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="apps-projects-create" class="nav-link">
-                                    <i class="ri-add-circle-line me-1"></i> Create Project
-                                </a>
-                            </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </li>
+                <?php endif; ?>
 
                 <!-- Tasks Section -->
                 <li class="nav-item">
