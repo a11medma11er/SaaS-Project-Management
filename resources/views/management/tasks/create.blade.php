@@ -104,26 +104,39 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select @error('status') is-invalid @enderror" name="status" required>
-                                    <option value="New" {{ old('status', $task->status ?? '') == 'New' ? 'selected' : '' }}>New</option>
-                                    <option value="Pending" {{ old('status', $task->status ?? '') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="Inprogress" {{ old('status', $task->status ?? '') == 'Inprogress' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="Completed" {{ old('status', $task->status ?? '') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+                                @php
+                                    $statuses = App\Enums\TaskStatus::cases();
+                                    $currentStatus = isset($task) ? $task->status->value : App\Enums\TaskStatus::NEW->value;
+                                @endphp
+                                @foreach($statuses as $status)
+                                    <option value="{{ $status->value }}" 
+                                        {{ (old('status', $currentStatus) == $status->value) ? 'selected' : '' }}>
+                                        {{ $status->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Priority</label>
-                        <select class="form-select @error('priority') is-invalid @enderror" name="priority" required>
-                            <option value="Low" {{ old('priority', $task->priority ?? '') == 'Low' ? 'selected' : '' }}>Low</option>
-                            <option value="Medium" {{ old('priority', $task->priority ?? 'Medium') == 'Medium' ? 'selected' : '' }}>Medium</option>
-                            <option value="High" {{ old('priority', $task->priority ?? '') == 'High' ? 'selected' : '' }}>High</option>
+                        <label for="priority" class="form-label">Priority <span class="text-danger">*</span></label>
+                        <select class="form-select @error('priority') is-invalid @enderror" id="priority" name="priority" required>
+                            @php
+                                $priorities = App\Enums\TaskPriority::cases();
+                                $currentPriority = isset($task) ? $task->priority->value : App\Enums\TaskPriority::MEDIUM->value;
+                            @endphp
+                            @foreach($priorities as $priority)
+                                <option value="{{ $priority->value }}" 
+                                    {{ (old('priority', $currentPriority) == $priority->value) ? 'selected' : '' }}>
+                                    {{ $priority->label() }}
+                                </option>
+                            @endforeach
                         </select>
                         @error('priority')
                             <div class="invalid-feedback">{{ $message }}</div>

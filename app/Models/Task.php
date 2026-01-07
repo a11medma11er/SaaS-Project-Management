@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\TaskStatus;
+use App\Enums\TaskPriority;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,6 +27,8 @@ class Task extends Model
 
     protected $casts = [
         'due_date' => 'date',
+        'status' => TaskStatus::class,
+        'priority' => TaskPriority::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -115,4 +119,100 @@ class Task extends Model
         });
     }
 
+    // Business Logic Methods
+    
+    /**
+     * Check if task is overdue
+     */
+    public function isOverdue(): bool
+    {
+        return $this->due_date < now()->startOfDay() 
+            && !$this->status->isTerminal();
+    }
+
+    /**
+     * Get days overdue (0 if not overdue)
+     */
+    public function getDaysOverdue(): int
+    {
+        if (!$this->isOverdue()) {
+            return 0;
+        }
+        return now()->startOfDay()->diffInDays($this->due_date);
+    }
+
+    /**
+     * Get urgency level based on how overdue the task is
+     */
+    public function getUrgencyLevel(): string
+    {
+        $days = $this->getDaysOverdue();
+        
+        return match(true) {
+            $days > 7 => 'critical',
+            $days > 3 => 'high',
+            $days > 0 => 'medium',
+            default => 'normal'
+        };
+    }
+
+    /**
+     * Check if task is due soon (within days)
+     */
+    public function isDueSoon(int $days = 3): bool
+    {
+        return $this->due_date <= now()->addDays($days) 
+            && $this->due_date >= now()->startOfDay()
+            && !$this->status->isTerminal();
+    }
+
+    // Query Scopes
+
+    /**
+     * Scope for overdue tasks
+     */
+    public function scopeOverdue($query)
+    {
+        return $query->where('due_date', '<', now()->startOfDay())
+            ->whereIn('status', [
+                TaskStatus::NEW->value,
+                TaskStatus::PENDING->value,
+                TaskStatus::IN_PROGRESS->value,
+                TaskStatus::ON_HOLD->value,
+            ]);
+    }
+
+    /**
+     * Scope for tasks due soon
+     */
+    public function scopeDueSoon($query, int $days = 3)
+    {
+        return $query->whereBetween('due_date', [
+            now()->startOfDay(),
+            now()->addDays($days)
+        ])->whereIn('status', [
+            TaskStatus::NEW->value,
+            TaskStatus::PENDING->value,
+            TaskStatus::IN_PROGRESS->value,
+        ]);
+    }
+
+    /**
+     * Scope for active tasks (in progress or pending)
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereIn('status', [
+            TaskStatus::IN_PROGRESS->value,
+            TaskStatus::PENDING->value,
+        ]);
+    }
+
+    /**
+     * Scope for completed tasks
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', TaskStatus::COMPLETED->value);
+    }
 }

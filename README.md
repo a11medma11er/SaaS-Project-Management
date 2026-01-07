@@ -412,9 +412,128 @@ git push origin feature/new-feature
 
 ---
 
-## 📝 Changelog
+## 📝 Recent Updates
 
-### Version 1.0.0 (2026-01-07)
+### Version 1.2.0 - Domain Stabilization (January 2026)
+
+#### 🎯 Domain Layer Enhancements
+- **Task Status Enum** - Standardized task statuses using PHP enums
+  - `TaskStatus`: NEW, PENDING, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED
+  - Type-safe status handling
+  - Consistent labels and colors across the system
+  
+- **Task Priority Enum** - Priority levels with enum
+  - `TaskPriority`: LOW, MEDIUM, HIGH, URGENT
+  - Built-in urgency detection
+  - Sorting and ordering logic
+
+#### 🔧 Business Logic Layer
+- **Overdue Detection System**
+  - `isOverdue()` - Automatic overdue detection
+  - `getDaysOverdue()` - Calculate days overdue
+  - `getUrgencyLevel()` - Critical/High/Medium/Normal levels
+  - `isDueSoon()` - Proactive deadline warnings
+
+- **Query Scopes**
+  - `overdue()` - Get all overdue tasks
+  - `dueSoon()` - Tasks approaching deadline
+  - `active()` - In progress or pending tasks
+  - `completed()` - Completed tasks
+
+- **Status Transition Validation**
+  - `TaskStatusService` - Validates status changes
+  - Predefined allowed transitions
+  - Prevents invalid state changes
+  - Business rule enforcement
+
+#### 📋 Validation & Rules
+- **Centralized Task Rules** (`TaskRules` helper)
+  - Consistent validation across create/update
+  - Date validation with business logic
+  - Dynamic rules based on task state
+
+#### 🗂️ Database Improvements
+- Migration to update enum values in existing data
+- Column size optimization (varchar 20 for status)
+- Backward compatible rollback
+
+#### 🎨 UI Enhancements
+- **Reusable TaskBadge Component**
+  - `<x-task-badge>` for status and priority
+  - Consistent styling across views
+  - Automatic color coding
+  
+- **Overdue Indicators**
+  - Visual badges showing days overdue
+  - Real-time urgency levels
+  - Enhanced task visibility
+
+#### 🏗️ Architecture
+- Clean separation: Domain logic independent of AI
+- Ready for Context Readiness phase
+- Boundary layer prepared for AI integration
+
+---
+
+### Version 1.1.0 - Tasks Management System (December 2025)
+
+#### ✨ New Features
+**Tasks Module Complete:**
+- Kanban Board view with drag-and-drop
+- List view with advanced filtering
+- Full CRUD operations
+- Comments system with real-time updates
+- File attachments (image, document, video support)
+- Time tracking with duration logging
+- Sub-tasks with nested structure
+- User assignment and team collaboration
+- Task tags and categorization
+- Priority levels (High, Medium, Low)
+- Status workflow (New, Pending, In Progress, Completed)
+- Due date tracking and reminders
+
+**Security Enhancements:**
+1. ✅ Fixed self-deletion vulnerability in user management
+2. ✅ Prevented Super Admin deletion
+3. ✅ File type validation for avatar uploads
+4. ✅ Secure file storage for task attachments
+5. ✅ Maximum file size limits (10MB attachments, 2MB avatars)
+6. ✅ Authorization checks on all task operations
+7. ✅ Comment length validation (max 1000 chars)
+8. ✅ Time entry validation (max 24 hours)
+9. ✅ Date validation (no future time entries)
+10. ✅ Sub-task depth limits
+11. ✅ Input sanitization across all forms
+12. ✅ CSRF protection on all mutations
+13. ✅ Permission-based access control
+14. ✅ Soft deletes with restoration capability
+
+**Database Changes:**
+- Created `tasks` table with comprehensive schema
+- Created `task_comments` table
+- Created `task_attachments` table
+- Created `task_sub_tasks` table
+- Created `task_time_entries` table
+- Created `task_user` pivot table for assignments
+- Created `task_tags` table
+- Added indexes for performance optimization
+- Made `avatar` column nullable in users table
+
+**Bug Fixes:**
+- ✅ Fixed avatar column null constraint
+- ✅ Fixed unique email validation in UpdateUserRequest
+- ✅ Fixed delete modal form submission
+- ✅ Fixed task number race condition
+- ✅ Fixed enum value migration
+
+**UI/UX Improvements:**
+- Modern card-based task layouts
+- Responsive design for all screen sizes
+- Color-coded priority badges
+- Status badges with visual indicators
+- Enhanced forms with validation feedback
+- Improved navigation and breadcrumbs
+
 - ✅ Complete Tasks Management System
 - ✅ Kanban Board implementation
 - ✅ Security fixes (14 critical fixes)

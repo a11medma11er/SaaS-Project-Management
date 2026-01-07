@@ -8,13 +8,12 @@ use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\TaskComment;
 use App\Models\TaskSubTask;
-use App\Models\TaskAttachment;
-use App\Models\TaskTimeEntry;
+use App\Enums\TaskStatus;
+use App\Enums\TaskPriority;
+use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -29,7 +28,7 @@ class TaskController extends Controller
 
         // Filter by status
         if ($request->filled('status') && $request->status !== 'all') {
-            $query->status($request->status);
+            $query->where('status', $request->status);
         }
 
         // Filter by priority
@@ -47,9 +46,9 @@ class TaskController extends Controller
         // Statistics
         $stats = [
             'total' => Task::count(),
-            'pending' => Task::status('Pending')->count(),
-            'completed' => Task::status('Completed')->count(),
-            'deleted' => Task::onlyTrashed()->count(),
+            'pending' => Task::where('status', TaskStatus::PENDING->value)->count(),
+            'completed' => Task::where('status', TaskStatus::COMPLETED->value)->count(),
+            'overdue' => Task::overdue()->count(),
         ];
 
         $projects = Project::select('id', 'title')->orderBy('title')->get();
@@ -64,20 +63,20 @@ class TaskController extends Controller
         
         // Get tasks grouped by status
         $tasksByStatus = [
-            'New' => Task::with(['assignedUsers', 'project'])
-                ->where('status', 'New')
+            'new' => Task::with(['assignedUsers', 'project'])
+                ->where('status', TaskStatus::NEW->value)
                 ->latest()
                 ->get(),
-            'Pending' => Task::with(['assignedUsers', 'project'])
-                ->where('status', 'Pending')
+            'pending' => Task::with(['assignedUsers', 'project'])
+                ->where('status', TaskStatus::PENDING->value)
                 ->latest()
                 ->get(),
-            'Inprogress' => Task::with(['assignedUsers', 'project'])
-                ->where('status', 'Inprogress')
+            'in_progress' => Task::with(['assignedUsers', 'project'])
+                ->where('status', TaskStatus::IN_PROGRESS->value)
                 ->latest()
                 ->get(),
-            'Completed' => Task::with(['assignedUsers', 'project'])
-                ->where('status', 'Completed')
+            'completed' => Task::with(['assignedUsers', 'project'])
+                ->where('status', TaskStatus::COMPLETED->value)
                 ->latest()
                 ->get(),
         ];

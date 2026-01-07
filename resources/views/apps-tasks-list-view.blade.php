@@ -251,10 +251,15 @@
                                     </td>
                                     <td class="due_date">{{ $task->due_date->format('d M, Y') }}</td>
                                     <td class="status">
-                                        <span class="badge @if($task->status === 'New') bg-info-subtle text-info @elseif($task->status === 'Pending') bg-warning-subtle text-warning @elseif($task->status === 'Inprogress') bg-secondary-subtle text-secondary @else bg-success-subtle text-success @endif text-uppercase">{{ $task->status }}</span>
+                                        <x-task-badge :value="$task->status->value" type="status" />
+                                        @if($task->isOverdue())
+                                            <span class="badge bg-danger-subtle text-danger ms-1">
+                                                <i class="ri-time-line"></i> {{ $task->getDaysOverdue() }} days overdue
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="priority">
-                                        <span class="badge @if($task->priority === 'High') bg-danger @elseif($task->priority === 'Medium') bg-warning @else bg-success @endif text-uppercase">{{ $task->priority }}</span>
+                                        <x-task-badge :value="$task->priority->value" type="priority" />
                                     </td>
                                 </tr>
                                 @empty

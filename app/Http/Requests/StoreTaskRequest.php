@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\TaskRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTaskRequest extends FormRequest
@@ -14,16 +15,16 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'title' => TaskRules::title(),
+            'description' => TaskRules::description(),
             'project_id' => ['nullable', 'exists:projects,id'],
-            'client_name' => ['nullable', 'string', 'max:255'],
-            'due_date' => ['required', 'date', 'after_or_equal:today'],
-            'status' => ['required', 'in:New,Pending,Inprogress,Completed'],
-            'priority' => ['required', 'in:High,Medium,Low'],
-            'assigned_users' => ['nullable', 'array'],
+            'client_name' => TaskRules::clientName(),
+            'due_date' => TaskRules::dueDate(),
+            'status' => TaskRules::status(),
+            'priority' => TaskRules::priority(),
+            'assigned_users' => TaskRules::assignedUsers(),
             'assigned_users.*' => ['exists:users,id'],
-            'tags' => ['nullable', 'array'],
+            'tags' => TaskRules::tags(),
             'tags.*' => ['string', 'max:50'],
         ];
     }
