@@ -1,82 +1,66 @@
-# 🚀 Project Management System
+# Project Management System 🚀
 
-A comprehensive Project Management System built with Laravel 12, featuring advanced Role-Based Access Control (RBAC) and complete project lifecycle management.
+A comprehensive Laravel-based project management system with advanced task management, role-based access control (RBAC), and AI-ready architecture.
 
-![Laravel](https://img.shields.io/badge/Laravel-12.x-red)
-![PHP](https://img.shields.io/badge/PHP-8.2-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+## 🌟 Features
 
----
+### 📊 **Tasks Management**
+- **Kanban Board** - Visual task management with drag-and-drop
+- **List View** - Detailed task listing with filters and search
+- **Task CRUD** - Complete create, read, update, delete operations
+- **Sub-tasks** - Break down complex tasks
+- **Comments System** - Nested comments with replies
+- **File Attachments** - Secure file uploads with type validation
+- **Time Tracking** - Log time entries for tasks
+- **User Assignment** - Assign multiple users to tasks
+- **Tags** - Organize tasks with custom tags
+- **Priority Levels** - High, Medium, Low
+- **Status Tracking** - New, Pending, In Progress, Completed
 
-## 📋 Table of Contents
+### 📁 **Projects Management**
+- Full CRUD operations for projects
+- Project overview and statistics
+- Team member assignment
+- Favorite projects
+- Project filtering and search
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Modules](#modules)
-- [Security](#security)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+### 👥 **User Management**
+- User CRUD operations
+- Avatar upload
+- Role assignment
+- Profile management
+- Self-deletion protection
 
----
-
-## ✨ Features
-
-### 🔐 Role-Based Access Control (RBAC)
-- **Dynamic Roles Management:** Create, edit, and delete custom roles
-- **Granular Permissions:** 20+ permissions across 5 modules
-- **Permission Assignment:** Flexible permission-to-role mapping
-- **User Role Management:** Assign multiple roles to users
-- **Protected Operations:** Super Admin protection, self-deletion prevention
-
-### 📊 Projects Management
-- **Complete CRUD Operations:** Create, Read, Update, Delete projects
-- **Rich Project Details:**
-  - Title, Description (CKEditor), Thumbnail
-  - Priority (High/Medium/Low), Status (Inprogress/Completed/On Hold)
-  - Privacy (Public/Team/Private)
-  - Deadlines, Start Dates, Progress Tracking
-  - Skills Tags, Categories
-- **Team Management:**
-  - Assign Team Lead
-  - Add/Remove Team Members
-  - Role-based member management
-- **Favorite Projects:** Quick access to important projects
-- **Advanced Search & Filters:** By status, priority, keywords
-- **File Attachments:** Upload and manage project files
-- **Dynamic UI:** Fully responsive Blade templates with Bootstrap 5
-
-### 👥 User Management
-- **User CRUD:** Full user lifecycle management
-- **Avatar Upload:** Profile picture management
-- **Role Assignment:** Multi-role support per user
+### 🔐 **Security & Permissions**
+- **Role-Based Access Control (RBAC)** using Spatie Laravel-Permission
+- 4 Default Roles: Super Admin, Admin, Manager, User
+- Granular permissions across 5 modules
 - **Security Features:**
-  - Password change functionality
-  - Self-deletion prevention
-  - Super Admin protection
+  - File upload type validation (prevents malicious uploads)
+  - CSRF protection
+  - Input validation and sanitization
+  - Authorization checks on all endpoints
+  - Comment length limits
+  - Date validation
 
-### 🎨 Modern UI/UX
-- **Bootstrap 5 Integration:** Clean, responsive design
-- **CKEditor Integration:** Rich text editing for descriptions
-- **Dynamic Avatars:** User initials fallback
-- **AJAX Features:** Favorite toggle without page reload
-- **Pagination:** Clean navigation for large datasets
+### 🎨 **UI/UX**
+- Modern, responsive design
+- Statistics dashboards
+- Real-time search and filters
+- Pagination support
+- Avatar with fallback initials
+- Status and priority badges
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-- **Backend:** Laravel 12, PHP 8.2
-- **Database:** MySQL (configurable)
+- **Framework:** Laravel 11.x
+- **PHP:** 8.2+
+- **Database:** MySQL
 - **Frontend:** Blade Templates, Bootstrap 5
-- **Rich Text:** CKEditor
-- **Permissions:** Spatie Laravel Permission
-- **Authentication:** Laravel Breeze/UI
-- **File Storage:** Laravel Storage (local/s3)
+- **Permissions:** Spatie Laravel-Permission
+- **Icons:** Remix Icon
 
 ---
 
@@ -85,8 +69,8 @@ A comprehensive Project Management System built with Laravel 12, featuring advan
 ### Prerequisites
 - PHP 8.2 or higher
 - Composer
-- MySQL 5.7+ / MariaDB 10.3+
-- Node.js & NPM (for frontend assets)
+- MySQL
+- Node.js & NPM
 
 ### Steps
 
@@ -96,24 +80,19 @@ git clone https://github.com/yourusername/Project-Management.git
 cd Project-Management
 ```
 
-2. **Install PHP dependencies**
+2. **Install dependencies**
 ```bash
 composer install
-```
-
-3. **Install Node dependencies**
-```bash
 npm install
-npm run build
 ```
 
-4. **Environment setup**
+3. **Environment setup**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-5. **Configure database**
+4. **Configure database**
 Edit `.env` file:
 ```env
 DB_CONNECTION=mysql
@@ -121,262 +100,294 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=project_management
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=your_password
 ```
 
-6. **Run migrations and seeders**
+5. **Run migrations**
 ```bash
 php artisan migrate
+```
+
+6. **Seed database**
+```bash
 php artisan db:seed --class=RolesAndPermissionsSeeder
 ```
 
-7. **Create storage link**
+7. **Build assets**
 ```bash
-php artisan storage:link
+npm run dev
+# or for production
+npm run build
 ```
 
-8. **Start development server**
+8. **Assign Super Admin role**
+```bash
+php assign_super_admin.php
+```
+Then login with your user credentials.
+
+9. **Start the server**
 ```bash
 php artisan serve
 ```
 
-Visit: `http://127.0.0.1:8000`
+Visit: `http://localhost:8000`
 
 ---
 
-## ⚙️ Configuration
+## 🗂️ Database Schema
 
-### Initial Admin Setup
+### Core Tables
+- `users` - User accounts
+- `roles` - User roles
+- `permissions` - System permissions
+- `projects` - Projects
+- `tasks` - Tasks with soft deletes
+- `task_user` - Task assignments (pivot)
+- `task_comments` - Task comments with nested replies
+- `task_attachments` - File attachments
+- `task_tags` - Task tags
+- `task_sub_tasks` - Sub-tasks
+- `task_time_entries` - Time tracking
 
-Run the provided script to assign Super Admin role:
+---
+
+## 🔑 Default Permissions
+
+### Users Module
+- `view-users`, `create-users`, `edit-users`, `delete-users`
+
+### Roles Module
+- `view-roles`, `create-roles`, `edit-roles`, `delete-roles`
+
+### Permissions Module
+- `view-permissions`, `create-permissions`, `edit-permissions`, `delete-permissions`
+
+### Projects Module
+- `view-projects`, `create-projects`, `edit-projects`, `delete-projects`
+
+### Tasks Module
+- `view-tasks`, `create-tasks`, `edit-tasks`, `delete-tasks`
+
+---
+
+## 📚 Usage
+
+### Creating a Task
+
+1. Navigate to **Tasks → Create Task**
+2. Fill in task details:
+   - Title (required)
+   - Description
+   - Project (optional)
+   - Due Date (required)
+   - Status & Priority
+   - Assign users
+   - Add tags
+3. Click **Create Task**
+
+### Using Kanban Board
+
+1. Navigate to **Tasks → Kanban Board**
+2. View tasks organized by status
+3. Drag and drop to change status (if enabled)
+4. Click on any task to view details
+
+### Managing Permissions
+
+1. Navigate to **Management → Roles**
+2. Create/Edit a role
+3. Assign permissions
+4. Assign role to users in **Management → Users**
+
+---
+
+## 🔒 Security Features
+
+### Implemented Security Measures
+
+1. **File Upload Protection**
+   - Restricted file types: pdf, doc, docx, xls, xlsx, png, jpg, jpeg, gif, zip, rar, txt
+   - Max file size: 10MB
+   - Prevents .php, .exe, and malicious file uploads
+
+2. **Authorization**
+   - Permission checks on all CRUD operations
+   - Route middleware protection
+   - Form request authorization
+
+3. **Input Validation**
+   - Comment max length: 1000 characters
+   - Description max length: 5000 characters
+   - Date validation (no past dates for task creation)
+   - Time entry validation (max 24 hours, no future dates)
+
+4. **Data Integrity**
+   - Database transactions (recommended for critical operations)
+   - Soft deletes for tasks
+   - Race condition prevention in task number generation
+   - Database indexes for performance
+
+5. **CSRF Protection**
+   - All forms include CSRF tokens
+   - Protected against cross-site request forgery
+
+---
+
+## 🐛 Known Issues & Solutions
+
+### Issue: View not found
+**Solution:** Clear view cache
 ```bash
+php artisan view:clear
+php artisan config:clear
+```
+
+### Issue: Permission denied
+**Solution:** Run database seeder and assign role
+```bash
+php artisan db:seed --class=RolesAndPermissionsSeeder
 php assign_super_admin.php
 ```
 
-Or manually via tinker:
+### Issue: File upload fails
+**Solution:** Check storage permissions
 ```bash
-php artisan tinker
+php artisan storage:link
+chmod -R 775 storage
 ```
-```php
-$user = User::where('email', 'admin@example.com')->first();
-$user->assignRole('Super Admin');
-```
-
-### Permissions Structure
-
-| Module | Permissions |
-|--------|-------------|
-| Users | view-users, create-users, edit-users, delete-users |
-| Roles | view-roles, create-roles, edit-roles, delete-roles |
-| Permissions | view-permissions, create-permissions, edit-permissions, delete-permissions |
-| Projects | view-projects, create-projects, edit-projects, delete-projects |
 
 ---
 
-## 📖 Usage
+## 🚀 Performance Optimization
 
-### Access Management Panel
+1. **Database Indexes**
+   - Indexes on foreign keys
+   - Composite index on `status` and `due_date`
+   - Migration included for all indexes
 
-Navigate to: `http://127.0.0.1:8000/management/`
+2. **Eager Loading**
+   - Relationships are eager loaded to prevent N+1 queries
+   - Example: `Task::with(['project', 'assignedUsers'])`
 
-Available sections:
-- **Users:** `/management/users`
-- **Roles:** `/management/roles`
-- **Permissions:** `/management/permissions`
-- **Projects:** `/management/projects`
-
-### Creating a Project
-
-1. Navigate to Projects → Add New
-2. Fill in project details:
-   - Basic info (Title, Description)
-   - Settings (Priority, Status, Privacy)
-   - Timeline (Deadline, Start Date)
-   - Team (Lead, Members)
-   - Files (Thumbnail, Attachments)
-3. Click "Create Project"
-
-### Managing Team Members
-
-1. On Create/Edit page, click "Invite Members"
-2. Select users from the modal
-3. Search functionality available for large teams
-4. Members displayed with avatars
-
-### Editing Projects
-
-1. Click project card or "..." menu → Edit
-2. All fields pre-populated
-3. Update as needed
-4. Changes saved immediately
-
-### Deleting Projects
-
-1. Click "..." menu → Remove
-2. Confirm deletion in modal
-3. Cascading delete:
-   - Project record
-   - Team associations
-   - Uploaded files (thumbnail, attachments)
+3. **Caching** (Future)
+   - Redis support ready
+   - Query result caching planned
 
 ---
 
-## 📚 Modules
+## 🔄 API Endpoints
 
-### Projects Module
-
-**Model: `App\Models\Project`**
-
-**Relationships:**
-- `teamLead()` - BelongsTo User (team leader)
-- `creator()` - BelongsTo User (project creator)
-- `members()` - BelongsToMany User (team members)
-- `attachments()` - HasMany ProjectAttachment
-- `comments()` - HasMany ProjectComment
-
-**Scopes:**
-- `scopeStatus($status)` - Filter by status
-- `scopePriority($priority)` - Filter by priority
-- `scopeFavorites()` - Only favorite projects
-- `scopeSearch($term)` - Search in title/description
-
-**Routes:**
-```php
-Route::prefix('management')->group(function () {
-    Route::middleware('can:view-projects')->group(function () {
-        Route::post('projects/{project}/toggle-favorite', 'toggleFavorite');
-        Route::resource('projects', ProjectController::class);
-    });
-});
+### Tasks Management
 ```
+GET    /management/tasks              - List all tasks
+GET    /management/tasks/kanban       - Kanban board view
+GET    /management/tasks/create       - Create form
+POST   /management/tasks              - Store task
+GET    /management/tasks/{id}         - Show task
+GET    /management/tasks/{id}/edit    - Edit form
+PUT    /management/tasks/{id}         - Update task
+DELETE /management/tasks/{id}         - Delete task (soft)
 
-### Users Module
-
-**Protected Operations:**
-- Self-deletion blocked
-- Super Admin deletion blocked
-- Password optional on update
-
-### Roles & Permissions
-
-**Seeded Roles:**
-- Super Admin (all permissions)
-- Admin (all except permissions management)
-- Manager (view users, all projects)
-- User (view projects only)
-
----
-
-## 🔒 Security
-
-### Features
-- CSRF Protection on all forms
-- XSS Prevention in Blade templates
-- SQL Injection protection via Eloquent ORM
-- Role-based authorization (`@can` directives)
-- File upload validation (type, size)
-- Request validation (Form Requests)
-
-### Best Practices
-- Never commit `.env` file
-- Use environment variables for sensitive data
-- Regular security updates
-- Strong password policies
-- Two-factor authentication (recommended)
+POST   /management/tasks/{id}/comments         - Add comment
+POST   /management/tasks/{id}/attachments      - Upload file
+POST   /management/tasks/{id}/sub-tasks        - Add sub-task
+PATCH  /management/tasks/sub-tasks/{id}/toggle - Toggle sub-task
+POST   /management/tasks/{id}/time-entries     - Log time
+```
 
 ---
 
 ## 🧪 Testing
 
-### Manual Testing Summary
-✅ All CRUD operations tested and working
-✅ Role-based access verified
-✅ File uploads functional
-✅ Search and filters operational
-✅ Team management working
-✅ Favorite toggle via AJAX
+### Run Tests (Coming Soon)
+```bash
+php artisan test
+```
 
-### Test Coverage
-- Project creation with all fields
-- Project editing and updates
-- Project deletion with cascading
-- Team member assignment
-- Permission-based access control
-
-**Full Test Report:** See `final_testing_report.md`
+### Manual Testing Checklist
+- [ ] Create task
+- [ ] Edit task
+- [ ] Delete task
+- [ ] Upload attachment (test .php rejection)
+- [ ] Add comment
+- [ ] Toggle sub-task
+- [ ] Log time entry
+- [ ] Check permissions
+- [ ] Test Kanban board
 
 ---
 
-## 🐛 Troubleshooting
+## 📈 Future Enhancements
 
-### Common Issues
+- [ ] **AI Features**
+  - AI Task Assistant
+  - AI Analytics
+  - Smart task recommendations
+  
+- [ ] **Notifications**
+  - Email notifications
+  - In-app notifications
+  - Task reminders
 
-**1. 500 Error after Create/Update/Delete**
-- **Cause:** Incorrect route names
-- **Solution:** All routes use `management.projects.*` namespace
-- **Fixed in:** Latest version
+- [ ] **Reports**
+  - Task completion reports
+  - Time tracking reports
+  - User productivity analytics
 
-**2. Avatar not displaying**
-- **Cause:** Storage link not created
-- **Solution:** Run `php artisan storage:link`
+- [ ] **Integrations**
+  - Slack integration
+  - Google Calendar sync
+  - Email integration
 
-**3. Permissions not working**
-- **Cause:** User not assigned a role
-- **Solution:** Assign role via Users management or tinker
+---
 
-**4. CKEditor not loading**
-- **Cause:** Missing assets
-- **Solution:** Run `npm install && npm run build`
+## 👨‍💻 Development
 
-**5. Favorite button not working**
-- **Cause:** Missing JavaScript or route conflict
-- **Solution:** JavaScript added in latest version, route order fixed
+### Code Quality Standards
+- PSR-12 coding standards
+- Laravel best practices
+- Comprehensive validation
+- Security-first approach
 
-### Logs Location
+### Git Workflow
 ```bash
-storage/logs/laravel.log
+# Feature branch
+git checkout -b feature/new-feature
+
+# Commit
+git add .
+git commit -m "feat: add new feature"
+
+# Push
+git push origin feature/new-feature
 ```
 
 ---
 
-## 📝 Recent Updates
+## 📝 Changelog
 
-### Version 1.0.0 (Latest)
-
-**Projects Management - Complete Implementation**
-- ✅ Full CRUD operations
-- ✅ Team management with roles
-- ✅ Advanced search and filtering
-- ✅ Favorite projects functionality
-- ✅ File attachments support
-- ✅ Rich text descriptions (CKEditor)
-- ✅ Progress tracking
-- ✅ Privacy settings
-
-**Bug Fixes:**
-- Fixed route naming conflicts
-- Fixed 500 error on redirects
-- Added missing JavaScript for favorites
-- Added validation for all fields
-- Fixed avatar display issues
-
-**UI/UX Improvements:**
-- Dynamic Blade templates (from 1400+ to 312 lines)
-- Responsive design
-- Avatar fallbacks
-- Clean pagination
-- Search with debounce
+### Version 1.0.0 (2026-01-07)
+- ✅ Complete Tasks Management System
+- ✅ Kanban Board implementation
+- ✅ Security fixes (14 critical fixes)
+- ✅ Delete functionality
+- ✅ File validation
+- ✅ Database indexes
+- ✅ Full RBAC system
+- ✅ Projects Management
+- ✅ User Management
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -m 'Add YourFeature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
 ---
@@ -387,20 +398,27 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
-## 👨‍💻 Author
+## 👤 Author
 
-**Ahmed Medhat**
+**Your Name**
+- GitHub: [@yourusername](https://github.com/yourusername)
+- Email: your.email@example.com
 
 ---
 
 ## 🙏 Acknowledgments
 
 - Laravel Framework
-- Spatie Permission Package
-- Bootstrap Team
-- CKEditor Team
-- All Contributors
+- Spatie Laravel-Permission
+- Bootstrap
+- RemixIcon
 
 ---
 
-**Built with ❤️ using Laravel**
+## 📞 Support
+
+For support, email your.email@example.com or open an issue on GitHub.
+
+---
+
+**Made with ❤️ using Laravel**

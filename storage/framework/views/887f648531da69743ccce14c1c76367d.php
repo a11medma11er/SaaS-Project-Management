@@ -95,7 +95,9 @@
                 </li>
                 <?php endif; ?>
 
+
                 <!-- Tasks Section -->
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-tasks')): ?>
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarTasks" data-bs-toggle="collapse" role="button"
                         aria-expanded="false" aria-controls="sidebarTasks">
@@ -104,23 +106,26 @@
                     <div class="collapse menu-dropdown" id="sidebarTasks">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="apps-tasks-kanban" class="nav-link">
+                                <a href="<?php echo e(route('management.tasks.kanban')); ?>" class="nav-link">
                                     <i class="ri-layout-masonry-line me-1"></i> Kanban Board
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="apps-tasks-list-view" class="nav-link">
-                                    <i class="ri-list-unordered me-1"></i> List View
+                                <a href="<?php echo e(route('management.tasks.index')); ?>" class="nav-link">
+                                    <i class="ri-list-unordered me-1"></i> All Tasks
                                 </a>
                             </li>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create-tasks')): ?>
                             <li class="nav-item">
-                                <a href="apps-tasks-details" class="nav-link">
-                                    <i class="ri-file-text-line me-1"></i> Task Details
+                                <a href="<?php echo e(route('management.tasks.create')); ?>" class="nav-link">
+                                    <i class="ri-add-line me-1"></i> Create Task
                                 </a>
                             </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </li>
+                <?php endif; ?>
 
                 <!-- AI Section -->
                 <li class="nav-item">

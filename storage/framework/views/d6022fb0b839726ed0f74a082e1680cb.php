@@ -1,19 +1,19 @@
-@extends('layouts.master')
-@section('title')
-    @lang('translation.list-view')
-@endsection
-@section('css')
-    <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
-@endsection
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+
+<?php $__env->startSection('title'); ?>
+    <?php echo app('translator')->get('translation.list-view'); ?>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('build/libs/sweetalert2/sweetalert2.min.css')); ?>" rel="stylesheet" type="text/css" />
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Tasks
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             Tasks view
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
     <div class="row">
         <div class="col-xxl-3 col-sm-6">
@@ -22,7 +22,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <p class="fw-medium text-muted mb-0">Total Tasks</p>
-                            <h2 class="mt-4 ff-secondary fw-semibold"><span class="counter-value" data-target="{{ $stats['total'] }}">0</span>
+                            <h2 class="mt-4 ff-secondary fw-semibold"><span class="counter-value" data-target="<?php echo e($stats['total']); ?>">0</span>
                             </h2>
                             <p class="mb-0 text-muted">All tasks in system</p>
                         </div>
@@ -45,7 +45,7 @@
                         <div>
                             <p class="fw-medium text-muted mb-0">Pending Tasks</p>
                             <h2 class="mt-4 ff-secondary fw-semibold"><span class="counter-value"
-                                    data-target="{{ $stats['pending'] }}">0</span></h2>
+                                    data-target="<?php echo e($stats['pending']); ?>">0</span></h2>
                             <p class="mb-0 text-muted">Tasks pending completion</p>
                         </div>
                         <div>
@@ -67,7 +67,7 @@
                         <div>
                             <p class="fw-medium text-muted mb-0">Completed Tasks</p>
                             <h2 class="mt-4 ff-secondary fw-semibold"><span class="counter-value"
-                                    data-target="{{ $stats['completed'] }}">0</span></h2>
+                                    data-target="<?php echo e($stats['completed']); ?>">0</span></h2>
                             <p class="mb-0 text-muted">Successfully completed</p>
                         </div>
                         <div>
@@ -89,7 +89,7 @@
                         <div>
                             <p class="fw-medium text-muted mb-0">Deleted Tasks</p>
                             <h2 class="mt-4 ff-secondary fw-semibold"><span class="counter-value"
-                                    data-target="{{ $stats['deleted'] }}">0</span></h2>
+                                    data-target="<?php echo e($stats['deleted']); ?>">0</span></h2>
                             <p class="mb-0 text-muted">Soft deleted tasks</p>
                         </div>
                         <div>
@@ -191,73 +191,73 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
-                                @forelse($tasks as $task)
+                                <?php $__empty_1 = true; $__currentLoopData = $tasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <th scope="row">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="chk_child" value="{{ $task->id }}">
+                                            <input class="form-check-input" type="checkbox" name="chk_child" value="<?php echo e($task->id); ?>">
                                         </div>
                                     </th>
-                                    <td class="id"><a href="{{ route('management.tasks.show', $task) }}" class="fw-medium link-primary">{{ $task->task_number }}</a></td>
+                                    <td class="id"><a href="<?php echo e(route('management.tasks.show', $task)); ?>" class="fw-medium link-primary"><?php echo e($task->task_number); ?></a></td>
                                     <td class="project_name">
-                                        @if($task->project)
-                                        <a href="{{ route('management.projects.show', $task->project) }}" class="fw-medium link-primary">{{ $task->project->title }}</a>
-                                        @else
+                                        <?php if($task->project): ?>
+                                        <a href="<?php echo e(route('management.projects.show', $task->project)); ?>" class="fw-medium link-primary"><?php echo e($task->project->title); ?></a>
+                                        <?php else: ?>
                                         <span class="text-muted">No Project</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="d-flex">
-                                            <div class="flex-grow-1 tasks_name">{{ $task->title }}</div>
+                                            <div class="flex-grow-1 tasks_name"><?php echo e($task->title); ?></div>
                                             <div class="flex-shrink-0 ms-4">
                                                 <ul class="list-inline tasks-list-menu mb-0">
-                                                    <li class="list-inline-item"><a href="{{ route('management.tasks.show', $task) }}"><i class="ri-eye-fill align-bottom me-2 text-muted"></i></a></li>
-                                                    @can('edit-tasks')
-                                                    <li class="list-inline-item"><a href="{{ route('management.tasks.edit', $task) }}"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i></a></li>
-                                                    @endcan
-                                                    @can('delete-tasks')
-                                                    <li class="list-inline-item"><a class="remove-item-btn" data-bs-toggle="modal" href="#deleteOrder" data-task-id="{{ $task->id }}"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i></a></li>
-                                                    @endcan
+                                                    <li class="list-inline-item"><a href="<?php echo e(route('management.tasks.show', $task)); ?>"><i class="ri-eye-fill align-bottom me-2 text-muted"></i></a></li>
+                                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-tasks')): ?>
+                                                    <li class="list-inline-item"><a href="<?php echo e(route('management.tasks.edit', $task)); ?>"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i></a></li>
+                                                    <?php endif; ?>
+                                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-tasks')): ?>
+                                                    <li class="list-inline-item"><a class="remove-item-btn" data-bs-toggle="modal" href="#deleteOrder" data-task-id="<?php echo e($task->id); ?>"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i></a></li>
+                                                    <?php endif; ?>
                                                 </ul>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="client_name">{{ $task->client_name ?? 'N/A' }}</td>
+                                    <td class="client_name"><?php echo e($task->client_name ?? 'N/A'); ?></td>
                                     <td class="assignedto">
-                                        @if($task->assignedUsers->count() > 0)
+                                        <?php if($task->assignedUsers->count() > 0): ?>
                                         <div class="avatar-group">
-                                            @foreach($task->assignedUsers->take(3) as $user)
-                                            <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="{{ $user->name }}">
-                                                @if($user->avatar)
-                                                <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}" class="rounded-circle avatar-xxs" />
-                                                @else
+                                            <?php $__currentLoopData = $task->assignedUsers->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="<?php echo e($user->name); ?>">
+                                                <?php if($user->avatar): ?>
+                                                <img src="<?php echo e(asset('storage/' . $user->avatar)); ?>" alt="<?php echo e($user->name); ?>" class="rounded-circle avatar-xxs" />
+                                                <?php else: ?>
                                                 <div class="avatar-xxs">
-                                                    <div class="avatar-title rounded-circle bg-primary">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                                    <div class="avatar-title rounded-circle bg-primary"><?php echo e(strtoupper(substr($user->name, 0, 1))); ?></div>
                                                 </div>
-                                                @endif
+                                                <?php endif; ?>
                                             </a>
-                                            @endforeach
-                                            @if($task->assignedUsers->count() > 3)
-                                            <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="{{ $task->assignedUsers->count() - 3 }} more">
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            <?php if($task->assignedUsers->count() > 3): ?>
+                                            <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="<?php echo e($task->assignedUsers->count() - 3); ?> more">
                                                 <div class="avatar-xxs">
-                                                    <div class="avatar-title rounded-circle bg-secondary">+{{ $task->assignedUsers->count() - 3 }}</div>
+                                                    <div class="avatar-title rounded-circle bg-secondary">+<?php echo e($task->assignedUsers->count() - 3); ?></div>
                                                 </div>
                                             </a>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
-                                        @else
+                                        <?php else: ?>
                                         <span class="text-muted">Unassigned</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
-                                    <td class="due_date">{{ $task->due_date->format('d M, Y') }}</td>
+                                    <td class="due_date"><?php echo e($task->due_date->format('d M, Y')); ?></td>
                                     <td class="status">
-                                        <span class="badge @if($task->status === 'New') bg-info-subtle text-info @elseif($task->status === 'Pending') bg-warning-subtle text-warning @elseif($task->status === 'Inprogress') bg-secondary-subtle text-secondary @else bg-success-subtle text-success @endif text-uppercase">{{ $task->status }}</span>
+                                        <span class="badge <?php if($task->status === 'New'): ?> bg-info-subtle text-info <?php elseif($task->status === 'Pending'): ?> bg-warning-subtle text-warning <?php elseif($task->status === 'Inprogress'): ?> bg-secondary-subtle text-secondary <?php else: ?> bg-success-subtle text-success <?php endif; ?> text-uppercase"><?php echo e($task->status); ?></span>
                                     </td>
                                     <td class="priority">
-                                        <span class="badge @if($task->priority === 'High') bg-danger @elseif($task->priority === 'Medium') bg-warning @else bg-success @endif text-uppercase">{{ $task->priority }}</span>
+                                        <span class="badge <?php if($task->priority === 'High'): ?> bg-danger <?php elseif($task->priority === 'Medium'): ?> bg-warning <?php else: ?> bg-success <?php endif; ?> text-uppercase"><?php echo e($task->priority); ?></span>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="9" class="text-center">
                                         <div class="text-muted py-4">
@@ -267,7 +267,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                         <!--end table-->
@@ -281,11 +281,12 @@
                             </div>
                         </div>
                     </div>
-                    @if($tasks->hasPages())
+                    <?php if($tasks->hasPages()): ?>
                     <div class="d-flex justify-content-end mt-2">
-                        {{ $tasks->links() }}
+                        <?php echo e($tasks->links()); ?>
+
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <!--end card-body-->
             </div>
@@ -307,8 +308,8 @@
                         <p class="text-muted fs-14 mb-4">Deleting your task will remove all of
                             your information from our database.</p>
                         <form id="deleteTaskForm" method="POST" action="">
-                            @csrf
-                            @method('DELETE')
+                            <?php echo csrf_field(); ?>
+                            <?php echo method_field('DELETE'); ?>
                             <div class="hstack gap-2 justify-content-center">
                                 <button type="button" class="btn btn-link btn-ghost-success fw-medium text-decoration-none"
                                     data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> Close</button>
@@ -332,7 +333,7 @@
         deleteButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const taskId = this.getAttribute('data-task-id');
-                const action = "{{ route('management.tasks.destroy', ':id') }}".replace(':id', taskId);
+                const action = "<?php echo e(route('management.tasks.destroy', ':id')); ?>".replace(':id', taskId);
                 deleteForm.setAttribute('action', action);
             });
         });
@@ -384,7 +385,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="james-forbes">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">James Forbes</span>
@@ -398,7 +399,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="john-robles">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">John Robles</span>
@@ -411,7 +412,7 @@
                                                     value="avatar-4.jpg" id="mary-gant">
                                                 <label class="form-check-label d-flex align-items-center" for="mary-gant">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Mary Gant</span>
@@ -425,7 +426,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="curtis-saenz">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-1.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-1.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Curtis Saenz</span>
@@ -439,7 +440,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="virgie-price">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-5.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-5.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Virgie Price</span>
@@ -453,7 +454,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="anthony-mills">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Anthony Mills</span>
@@ -467,7 +468,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="marian-angel">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-6.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Marian Angel</span>
@@ -481,7 +482,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="johnnie-walton">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Johnnie Walton</span>
@@ -495,7 +496,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="donna-weston">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Donna Weston</span>
@@ -509,7 +510,7 @@
                                                 <label class="form-check-label d-flex align-items-center"
                                                     for="diego-norris">
                                                     <span class="flex-shrink-0">
-                                                        <img src="{{ URL::asset('build/images/users/avatar-9.jpg') }}"
+                                                        <img src="<?php echo e(URL::asset('build/images/users/avatar-9.jpg')); ?>"
                                                             alt="" class="avatar-xxs rounded-circle">
                                                     </span>
                                                     <span class="flex-grow-1 ms-2">Diego Norris</span>
@@ -555,7 +556,7 @@
                             <button type="button" class="btn btn-light" id="close-modal"
                                 data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-success" id="add-btn">Add Task</button>
-                            {{-- <button type="button" class="btn btn-primary" id="edit-btn">Update Task</button> --}}
+                            
                         </div>
                     </div>
                 </form>
@@ -563,11 +564,13 @@
         </div>
     </div>
     <!--end modal-->
-@endsection
-@section('script')
-    <script src="{{ URL::asset('build/libs/list.js/list.min.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/list.pagination.js/list.pagination.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/pages/tasks-list.init.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
+    <script src="<?php echo e(URL::asset('build/libs/list.js/list.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/list.pagination.js/list.pagination.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/tasks-list.init.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/sweetalert2/sweetalert2.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\work\my projects\Git\Project-Management\resources\views/apps-tasks-list-view.blade.php ENDPATH**/ ?>

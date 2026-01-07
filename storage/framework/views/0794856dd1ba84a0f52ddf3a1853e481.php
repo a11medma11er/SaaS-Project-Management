@@ -1,6 +1,6 @@
-@extends('layouts.master')
-@section('title') @lang('translation.task-details') @endsection
-@section('content')
+
+<?php $__env->startSection('title'); ?> <?php echo app('translator')->get('translation.task-details'); ?> <?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
 <div class="row">
     <div class="col-xxl-3">
@@ -12,8 +12,8 @@
                         colors="primary:#8c68cd,secondary:#4788ff" style="width:90px;height:90px">
                     </lord-icon>
                 </div>
-                <h3 class="mb-1">{{ $task->timeEntries->sum('duration_minutes') }} min</h3>
-                <h5 class="fs-14 mb-4">{{ $task->title }}</h5>
+                <h3 class="mb-1"><?php echo e($task->timeEntries->sum('duration_minutes')); ?> min</h3>
+                <h5 class="fs-14 mb-4"><?php echo e($task->title); ?></h5>
                 <div class="hstack gap-2 justify-content-center">
                     <button class="btn btn-danger btn-sm"><i class="ri-stop-circle-line align-bottom me-1"></i> Stop</button>
                     <button class="btn btn-primary btn-sm"><i class="ri-play-circle-line align-bottom me-1"></i> Start</button>
@@ -37,27 +37,27 @@
                         <tbody>
                             <tr>
                                 <td class="fw-medium">Tasks No</td>
-                                <td>{{ $task->task_number }}</td>
+                                <td><?php echo e($task->task_number); ?></td>
                             </tr>
                             <tr>
                                 <td class="fw-medium">Tasks Title</td>
-                                <td>{{ $task->title }}</td>
+                                <td><?php echo e($task->title); ?></td>
                             </tr>
                             <tr>
                                 <td class="fw-medium">Project Name</td>
-                                <td>{{ $task->project ? $task->project->title : 'N/A' }}</td>
+                                <td><?php echo e($task->project ? $task->project->title : 'N/A'); ?></td>
                             </tr>
                             <tr>
                                 <td class="fw-medium">Priority</td>
-                                <td><span class="badge @if($task->priority === 'High') bg-danger-subtle text-danger @elseif($task->priority === 'Medium') bg-warning-subtle text-warning @else bg-success-subtle text-success @endif">{{ $task->priority }}</span></td>
+                                <td><span class="badge <?php if($task->priority === 'High'): ?> bg-danger-subtle text-danger <?php elseif($task->priority === 'Medium'): ?> bg-warning-subtle text-warning <?php else: ?> bg-success-subtle text-success <?php endif; ?>"><?php echo e($task->priority); ?></span></td>
                             </tr>
                             <tr>
                                 <td class="fw-medium">Status</td>
-                                <td><span class="badge @if($task->status === 'New') bg-info-subtle text-info @elseif($task->status === 'Pending') bg-warning-subtle text-warning @elseif($task->status === 'Inprogress') bg-secondary-subtle text-secondary @else bg-success-subtle text-success @endif">{{ $task->status }}</span></td>
+                                <td><span class="badge <?php if($task->status === 'New'): ?> bg-info-subtle text-info <?php elseif($task->status === 'Pending'): ?> bg-warning-subtle text-warning <?php elseif($task->status === 'Inprogress'): ?> bg-secondary-subtle text-secondary <?php else: ?> bg-success-subtle text-success <?php endif; ?>"><?php echo e($task->status); ?></span></td>
                             </tr>
                             <tr>
                                 <td class="fw-medium">Due Date</td>
-                                <td>{{ $task->due_date->format('d M, Y') }}</td>
+                                <td><?php echo e($task->due_date->format('d M, Y')); ?></td>
                             </tr>
                         </tbody>
                     </table><!--end table-->
@@ -76,7 +76,7 @@
                     <li>
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="avatar-xs rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
                             </div>
                             <div class="flex-grow-1 ms-2">
                                 <h6 class="mb-1"><a href="pages-profile">Tonya Noble</a></h6>
@@ -99,7 +99,7 @@
                     <li>
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt="" class="avatar-xs rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
                             </div>
                             <div class="flex-grow-1 ms-2">
                                 <h6 class="mb-1"><a href="pages-profile">Thomas Taylor</a></h6>
@@ -122,7 +122,7 @@
                     <li>
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt="" class="avatar-xs rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
                             </div>
                             <div class="flex-grow-1 ms-2">
                                 <h6 class="mb-1"><a href="pages-profile">Nancy Martino</a></h6>
@@ -328,7 +328,7 @@
                         <div data-simplebar style="height: 508px;" class="px-3 mx-n3 mb-2">
                             <div class="d-flex mb-4">
                                 <div class="flex-shrink-0">
-                                    <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}" alt="" class="avatar-xs rounded-circle" />
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <h5 class="fs-13"><a href="pages-profile">Joseph Parker</a> <small class="text-muted">20 Dec 2021 - 05:47AM</small></h5>
@@ -336,7 +336,7 @@
                                     <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
                                     <div class="d-flex mt-4">
                                         <div class="flex-shrink-0">
-                                            <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="avatar-xs rounded-circle" />
+                                            <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
                                         </div>
                                         <div class="flex-grow-1 ms-3">
                                             <h5 class="fs-13"><a href="pages-profile">Tonya Noble</a> <small class="text-muted">22 Dec 2021 - 02:32PM</small></h5>
@@ -348,7 +348,7 @@
                             </div>
                             <div class="d-flex mb-4">
                                 <div class="flex-shrink-0">
-                                    <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt="" class="avatar-xs rounded-circle" />
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <h5 class="fs-13"><a href="pages-profile">Thomas Taylor</a> <small class="text-muted">24 Dec 2021 - 05:20PM</small></h5>
@@ -358,23 +358,23 @@
                             </div>
                             <div class="d-flex">
                                 <div class="flex-shrink-0">
-                                    <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="avatar-xs rounded-circle" />
+                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <h5 class="fs-13"><a href="pages-profile">Tonya Noble</a> <small class="text-muted">26 min ago</small></h5>
                                     <p class="text-muted">Your <a href="javascript:void(0)" class="text-decoration-underline">Online Order Support</a> provides you with the most current status of your order. To help manage your order refer to the “Action Menu” to initiate return, contact Customer Support and more.</p>
                                     <div class="row g-2 mb-3">
                                         <div class="col-lg-1 col-sm-2 col-6">
-                                            <img src="{{ URL::asset('build/images/small/img-4.jpg') }}" alt="" class="img-fluid rounded">
+                                            <img src="<?php echo e(URL::asset('build/images/small/img-4.jpg')); ?>" alt="" class="img-fluid rounded">
                                         </div>
                                         <div class="col-lg-1 col-sm-2 col-6">
-                                            <img src="{{ URL::asset('build/images/small/img-5.jpg') }}" alt="" class="img-fluid rounded">
+                                            <img src="<?php echo e(URL::asset('build/images/small/img-5.jpg')); ?>" alt="" class="img-fluid rounded">
                                         </div>
                                     </div>
                                     <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
                                     <div class="d-flex mt-4">
                                         <div class="flex-shrink-0">
-                                            <img src="{{ URL::asset('build/images/users/avatar-6.jpg') }}" alt="" class="avatar-xs rounded-circle" />
+                                            <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
                                         </div>
                                         <div class="flex-grow-1 ms-3">
                                             <h5 class="fs-13"><a href="pages-profile">Nancy Martino</a> <small class="text-muted">8 sec ago</small></h5>
@@ -385,8 +385,8 @@
                                 </div>
                             </div>
                         </div>
-                        <form action="{{ route('management.tasks.comments.store', $task) }}" method="POST" class="mt-4">
-                            @csrf
+                        <form action="<?php echo e(route('management.tasks.comments.store', $task)); ?>" method="POST" class="mt-4">
+                            <?php echo csrf_field(); ?>
                             <div class="row g-3">
                                 <div class="col-lg-12">
                                     <label for="comment-textarea" class="form-label">Leave a Comment</label>
@@ -550,7 +550,7 @@
                                     <tr>
                                         <th scope="row">
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt="" class="rounded-circle avatar-xxs">
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="rounded-circle avatar-xxs">
                                                 <div class="flex-grow-1 ms-2">
                                                     <a href="pages-profile" class="fw-medium">Thomas Taylor</a>
                                                 </div>
@@ -564,7 +564,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="rounded-circle avatar-xxs">
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="rounded-circle avatar-xxs">
                                                 <div class="flex-grow-1 ms-2">
                                                     <a href="pages-profile" class="fw-medium">Tonya Noble</a>
                                                 </div>
@@ -578,7 +578,7 @@
                                     <tr>
                                         <th scope="row">
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="rounded-circle avatar-xxs">
+                                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="rounded-circle avatar-xxs">
                                                 <div class="flex-grow-1 ms-2">
                                                     <a href="pages-profile" class="fw-medium">Tonya Noble</a>
                                                 </div>
@@ -620,17 +620,17 @@
                     <div class="avatar-group justify-content-center">
                         <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Tonya Noble">
                             <div class="avatar-xs">
-                                <img src="{{ URL::asset('build/images/users/avatar-10.jpg') }}" alt="" class="rounded-circle img-fluid">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="rounded-circle img-fluid">
                             </div>
                         </a>
                         <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Thomas Taylor">
                             <div class="avatar-xs">
-                                <img src="{{ URL::asset('build/images/users/avatar-8.jpg') }}" alt="" class="rounded-circle img-fluid">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="rounded-circle img-fluid">
                             </div>
                         </a>
                         <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Nancy Martino">
                             <div class="avatar-xs">
-                                <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt="" class="rounded-circle img-fluid">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="rounded-circle img-fluid">
                             </div>
                         </a>
                     </div>
@@ -639,7 +639,7 @@
                     <div class="vstack gap-3">
                         <div class="d-flex align-items-center">
                             <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                             </div>
                             <div class="flex-grow-1">
                                 <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Nancy Martino</a></h5>
@@ -665,7 +665,7 @@
                         <!-- end member item -->
                         <div class="d-flex align-items-center">
                             <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="{{ URL::asset('build/images/users/avatar-3.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                             </div>
                             <div class="flex-grow-1">
                                 <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Frank Hook</a></h5>
@@ -677,7 +677,7 @@
                         <!-- end member item -->
                         <div class="d-flex align-items-center">
                             <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="{{ URL::asset('build/images/users/avatar-4.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                             </div>
                             <div class="flex-grow-1">
                                 <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Jennifer Carter</a></h5>
@@ -703,7 +703,7 @@
                         <!-- end member item -->
                         <div class="d-flex align-items-center">
                             <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="{{ URL::asset('build/images/users/avatar-7.jpg') }}" alt="" class="img-fluid rounded-circle">
+                                <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt="" class="img-fluid rounded-circle">
                             </div>
                             <div class="flex-grow-1">
                                 <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Joseph Parker</a></h5>
@@ -727,7 +727,9 @@
     <!-- modal-dialog -->
 </div>
 <!-- end modal -->
-@endsection
-@section('script')
-<script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\work\my projects\Git\Project-Management\resources\views/apps-tasks-details.blade.php ENDPATH**/ ?>

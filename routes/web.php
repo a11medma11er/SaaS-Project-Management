@@ -49,6 +49,28 @@ Route::middleware(['auth'])->prefix('management')->name('management.')->group(fu
         
         Route::resource('projects', App\Http\Controllers\Management\ProjectController::class);
     });
+    
+    // Tasks Management
+    Route::middleware('can:view-tasks')->group(function () {
+        // Kanban board (must be before resource route)
+        Route::get('tasks/kanban', [App\Http\Controllers\Management\TaskController::class, 'kanban'])
+            ->name('tasks.kanban');
+            
+        Route::resource('tasks', App\Http\Controllers\Management\TaskController::class);
+        
+        // Additional endpoints
+        Route::post('tasks/{task}/comments', [App\Http\Controllers\Management\TaskController::class, 'storeComment'])
+            ->name('tasks.comments.store');
+        Route::post('tasks/{task}/attachments', [App\Http\Controllers\Management\TaskController::class, 'storeAttachment'])
+            ->name('tasks.attachments.store');
+        Route::post('tasks/{task}/sub-tasks', [App\Http\Controllers\Management\TaskController::class, 'storeSubTask'])
+            ->name('tasks.sub-tasks.store');
+        Route::patch('tasks/sub-tasks/{subTask}/toggle', [App\Http\Controllers\Management\TaskController::class, 'toggleSubTask'])
+            ->name('tasks.sub-tasks.toggle');
+        Route::post('tasks/{task}/time-entries', [App\Http\Controllers\Management\TaskController::class, 'storeTimeEntry'])
+            ->name('tasks.time-entries.store');
+    });
+
 });
 
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
