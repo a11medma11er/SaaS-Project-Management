@@ -214,7 +214,13 @@ class TaskController extends Controller
         $this->authorize('edit-tasks');
         
         $request->validate([
-            'file' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg,gif,zip,rar,txt',
+            'file' => [
+                'required',
+                'file',
+                'max:10240', // 10MB
+                'mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg,gif,zip,rar,txt',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/jpeg,image/png,image/gif,application/zip,text/plain',
+            ],
         ]);
 
 

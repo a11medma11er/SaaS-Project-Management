@@ -45,4 +45,48 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    /**
+     * Get tasks created by this user
+     */
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
+    
+    /**
+     * Get tasks assigned to this user
+     */
+    public function assignedTasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_user')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+    
+    /**
+     * Get projects created by this user
+     */
+    public function createdProjects()
+    {
+        return $this->hasMany(Project::class, 'created_by');
+    }
+    
+    /**
+     * Get projects where user is team lead
+     */
+    public function ledProjects()
+    {
+        return $this->hasMany(Project::class, 'team_lead_id');
+    }
+    
+    /**
+     * Get projects this user is a member of
+     */
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_members')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
 }

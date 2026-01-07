@@ -23,6 +23,22 @@ enum TaskPriority: string
     }
 
     /**
+     * Check if this priority is urgent (ONLY URGENT, not HIGH)
+     */
+    public function isUrgent(): bool
+    {
+        return $this === self::URGENT;
+    }
+    
+    /**
+     * Get all urgent-level priorities
+     */
+    public static function urgentLevels(): array
+    {
+        return [self::URGENT, self::HIGH];
+    }
+
+    /**
      * Get Bootstrap color class
      */
     public function color(): string
@@ -68,14 +84,6 @@ enum TaskPriority: string
             self::HIGH => 'ri-arrow-up-line',
             self::URGENT => 'ri-error-warning-line',
         };
-    }
-
-    /**
-     * Check if priority requires immediate attention
-     */
-    public function isUrgent(): bool
-    {
-        return in_array($this, [self::HIGH, self::URGENT]);
     }
 
     /**

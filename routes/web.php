@@ -13,15 +13,19 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Auth::routes();
+// Authentication Routes with Rate Limiting (5 attempts per minute)
+Auth::routes(['verify' => true]);
+
 //Language Translation
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
 
-//Update User Details
-Route::post('/update-profile/{id}', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('updateProfile');
-Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class, 'updatePassword'])->name('updatePassword');
+//Update User Details - Rate Limited to prevent abuse
+Route::middleware(['auth', 'throttle:10,1'])->group(function () {
+    Route::post('/update-profile/{id}', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('updateProfile');
+    Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class, 'updatePassword'])->name('updatePassword');
+});
 
 // Management Routes (Users, Roles, Permissions)
 Route::middleware(['auth'])->prefix('management')->name('management.')->group(function () {

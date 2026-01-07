@@ -31,15 +31,19 @@ class TaskRules
 
     /**
      * Validation rules for due date
-     * 
-     * @param string|null $currentStatus Current task status (null for new tasks)
+     * Accepts both string and TaskStatus enum
      */
-    public static function dueDate(?string $currentStatus = null): array
+    public static function dueDate($currentStatus = null): array
     {
+        // Convert Enum to string value if needed
+        $statusValue = $currentStatus instanceof TaskStatus 
+            ? $currentStatus->value 
+            : $currentStatus;
+            
         $rules = ['required', 'date'];
         
         // New tasks must have future due date
-        if ($currentStatus === null || $currentStatus === TaskStatus::NEW->value) {
+        if ($statusValue === null || $statusValue === 'new') {
             $rules[] = 'after_or_equal:today';
         }
         

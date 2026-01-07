@@ -141,7 +141,8 @@ class Task extends Model
         if (!$this->isOverdue()) {
             return 0;
         }
-        return now()->startOfDay()->diffInDays($this->due_date);
+        // Fixed: should be due_date->diffInDays(now()) not now()->diffInDays(due_date)
+        return $this->due_date->diffInDays(now()->startOfDay());
     }
 
     /**
