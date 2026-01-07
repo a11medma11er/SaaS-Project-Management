@@ -398,13 +398,6 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
-## 👤 Author
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-
----
 
 ## 🙏 Acknowledgments
 
@@ -413,11 +406,6 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 - Bootstrap
 - RemixIcon
 
----
-
-## 📞 Support
-
-For support, email your.email@example.com or open an issue on GitHub.
 
 ---
 
