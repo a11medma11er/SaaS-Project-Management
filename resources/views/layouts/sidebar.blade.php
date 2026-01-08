@@ -198,6 +198,11 @@
                                     <i class="ri-shield-check-line me-1"></i> Guardrails
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('ai.features.index') }}" class="nav-link">
+                                    <i class="ri-magic-line me-1"></i> AI Features
+                                </a>
+                            </li>
                             @endcan
                         </ul>
                     </div>

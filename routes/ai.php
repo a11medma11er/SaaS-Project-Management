@@ -92,11 +92,12 @@ Route::prefix('admin/ai')
             Route::post('/safety/fallback', [AISafetyController::class, 'updateFallback'])->name('safety.fallback');
         });
 
-        // ============================================
         // AI Features
         // ============================================
         Route::middleware(['can:access-ai-control'])->group(function () {
+            Route::get('/features', [AIFeaturesController::class, 'index'])->name('features.index');
             Route::post('/analyze-codebase', [AIFeaturesController::class, 'analyzeCodebase'])->name('features.analyze');
+            Route::post('/development-plan', [AIFeaturesController::class, 'createDevelopmentPlan'])->name('features.development_plan');
             Route::post('/breakdown-project', [AIFeaturesController::class, 'breakdownProject'])->name('features.breakdown');
             Route::post('/create-study', [AIFeaturesController::class, 'createStudy'])->name('features.study');
             Route::post('/analyze-task', [AIFeaturesController::class, 'analyzeTask'])->name('features.task');

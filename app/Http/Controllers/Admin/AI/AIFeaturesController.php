@@ -16,6 +16,14 @@ class AIFeaturesController extends Controller
     }
 
     /**
+     * Display AI features page
+     */
+    public function index()
+    {
+        return view('admin.ai-features.index');
+    }
+
+    /**
      * Generate development plan for a project
      */
     public function createDevelopmentPlan(Request $request)
@@ -538,5 +546,160 @@ class AIFeaturesController extends Controller
             ],
             'contingency_plans' => 'Buffer time allocated, backup resources identified',
         ];
+    }
+
+    /**
+     * Breakdown project into detailed tasks
+     */
+    public function breakdownProject(Request $request)
+    {
+        $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'granularity' => 'nullable|in:high,medium,low',
+        ]);
+
+        try {
+            $project = Project::with(['tasks'])->findOrFail($request->project_id);
+            $granularity = $request->granularity ?? 'medium';
+            
+            // Generate task breakdown
+            $breakdown = $this->generateTaskBreakdown($project, $granularity);
+            
+            // Log activity
+            activity('ai')
+                ->causedBy(auth()->user())
+                ->performedOn($project)
+                ->withProperties(['feature' => 'project_breakdown', 'granularity' => $granularity])
+                ->log('generated_project_breakdown');
+            
+            return response()->json([
+                'success' => true,
+                'breakdown' => $breakdown,
+                'project' => $project->title,
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Project breakdown failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to breakdown project',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate detailed task breakdown
+     */
+    protected function generateTaskBreakdown(Project $project, string $granularity): array
+    {
+        $taskTemplates = $this->getTaskTemplates($granularity);
+        $estimatedTasks = [];
+        
+        foreach ($taskTemplates as $category => $tasks) {
+            $estimatedTasks[$category] = [
+                'tasks' => $tasks,
+                'estimated_duration' => $this->estimateCategoryDuration($tasks),
+                'priority' => $this->determineCategoryPriority($category),
+            ];
+        }
+        
+        return [
+            'project_id' => $project->id,
+            'project_title' => $project->title,
+            'granularity' => $granularity,
+            'total_estimated_tasks' => $this->countTotalTasks($estimatedTasks),
+            'categories' => $estimatedTasks,
+            'generated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Get task templates based on granularity
+     */
+    protected function getTaskTemplates(string $granularity): array
+    {
+        $templates = [
+            'Planning' => [
+                'Define project scope and objectives',
+                'Create detailed requirements document',
+                'Establish project timeline and milestones',
+                'Identify key stakeholders',
+            ],
+            'Design' => [
+                'Create system architecture diagram',
+                'Design database schema',
+                'Create UI/UX mockups',
+                'Define API endpoints',
+            ],
+            'Development' => [
+                'Setup development environment',
+                'Implement backend API',
+                'Implement frontend UI',
+                'Database migration scripts',
+                'Integration with third-party services',
+            ],
+            'Testing' => [
+                'Write unit tests',
+                'Perform integration testing',
+                'Conduct UAT',
+                'Performance testing',
+            ],
+            'Deployment' => [
+                'Setup production environment',
+                'Deploy application',
+                'Configure monitoring',
+                'Create deployment documentation',
+            ],
+        ];
+        
+        if ($granularity === 'high') {
+            // Add more detailed sub-tasks
+            $templates['Development'][] = 'Code review process';
+            $templates['Development'][] = 'Refactoring and optimization';
+            $templates['Testing'][] = 'Security testing';
+            $templates['Testing'][] = 'Load testing';
+        }
+        
+        return $templates;
+    }
+
+    /**
+     * Estimate category duration
+     */
+    protected function estimateCategoryDuration(array $tasks): string
+    {
+        $taskCount = count($tasks);
+        $weeks = ceil($taskCount / 3); // Rough estimate
+        
+        return $weeks . ' week' . ($weeks > 1 ? 's' : '');
+    }
+
+    /**
+     * Determine category priority
+     */
+    protected function determineCategoryPriority(string $category): string
+    {
+        return match ($category) {
+            'Planning' => 'Critical',
+            'Design' => 'High',
+            'Development' => 'High',
+            'Testing' => 'Medium',
+            'Deployment' => 'High',
+            default => 'Medium',
+        };
+    }
+
+    /**
+     * Count total tasks
+     */
+    protected function countTotalTasks(array $breakdown): int
+    {
+        $total = 0;
+        foreach ($breakdown as $category) {
+            $total += count($category['tasks']);
+        }
+        return $total;
     }
 }
