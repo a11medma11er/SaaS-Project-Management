@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AI\AIControlController;
 use App\Http\Controllers\Admin\AI\AIPromptController;
 use App\Http\Controllers\Admin\AI\AIDecisionController;
+use App\Http\Controllers\Admin\AI\AIGuardrailController;
 use App\Http\Controllers\Admin\AI\AIDecisionReviewController;
 use App\Http\Controllers\Admin\AI\AIInsightsController;
 use App\Http\Controllers\Admin\AI\AIAnalyticsController;
@@ -99,5 +100,13 @@ Route::prefix('admin/ai')
             Route::post('/breakdown-project', [AIFeaturesController::class, 'breakdownProject'])->name('features.breakdown');
             Route::post('/create-study', [AIFeaturesController::class, 'createStudy'])->name('features.study');
             Route::post('/analyze-task', [AIFeaturesController::class, 'analyzeTask'])->name('features.task');
+        });
+
+        // Guardrails Settings
+        Route::prefix('guardrails')->name('guardrails.')->middleware('can:manage-ai-settings')->group(function () {
+            Route::get('/', [AIGuardrailController::class, 'index'])->name('index');
+            Route::post('/rule/update', [AIGuardrailController::class, 'updateRule'])->name('rule.update');
+            Route::post('/threshold/update', [AIGuardrailController::class, 'updateThreshold'])->name('threshold.update');
+            Route::post('/cache/clear', [AIGuardrailController::class, 'clearCache'])->name('cache.clear');
         });
     });

@@ -14,13 +14,16 @@ class AIDecisionEngine
 {
     protected $dataAggregator;
     protected $contextBuilder;
+    protected $guardrailService;
 
     public function __construct(
         AIDataAggregator $dataAggregator,
-        AIContextBuilder $contextBuilder
+        AIContextBuilder $contextBuilder,
+        AIGuardrailService $guardrailService
     ) {
         $this->dataAggregator = $dataAggregator;
         $this->contextBuilder = $contextBuilder;
+        $this->guardrailService = $guardrailService;
     }
 
     /**
@@ -393,6 +396,49 @@ class AIDecisionEngine
         try {
             $action = $modifiedAction ?? $decision->recommendation;
             
+            // Check guardrails before execution
+            $guardrailCheck = $this->guardrailService->checkDecision($decision);
+            
+            if (!$guardrailCheck['passed']) {
+                Log::warning("Guardrail violations detected for decision #{$decision->id}", [
+                    'violations' => $guardrailCheck['violations'],
+                    'severity' => $guardrailCheck['highest_severity'],
+                ]);
+                
+                // Update decision with violation info
+                $decision->update([
+                    'guardrail_violations' => $guardrailCheck['total_violations'],
+                    'guardrail_check' => $guardrailCheck,
+                    'execution_result' => [
+                        'status' => 'blocked',
+                        'reason' => 'Guardrail violations detected',
+                        'violations' => $guardrailCheck['violations'],
+                        'severity' => $guardrailCheck['highest_severity'],
+                        'timestamp' => now()->toIso8601String(),
+                    ]
+                ]);
+                
+                // If critical or high severity, block execution
+                if (in_array($guardrailCheck['highest_severity'], ['critical', 'high'])) {
+                    Log::error("Execution blocked for decision #{$decision->id} due to {$guardrailCheck['highest_severity']} severity violations");
+                    
+                    // Notify admins about critical violation
+                    try {
+                        $admins = User::permission('manage-ai-settings')->get();
+                        if ($admins->isNotEmpty()) {
+                            Notification::send($admins, new \App\Notifications\GuardrailViolationNotification($decision, $guardrailCheck));
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning("Failed to send guardrail violation notification: " . $e->getMessage());
+                    }
+                    
+                    return false;
+                }
+                
+                // Medium severity: log warning but allow execution
+                Log::warning("Proceeding with execution despite medium severity violations");
+            }
+            
             // Log execution attempt
             Log::info("Executing AI decision #{$decision->id}: {$action}");
 
@@ -404,6 +450,7 @@ class AIDecisionEngine
                 'execution_result' => [
                     'status' => 'simulated',
                     'action_taken' => $action,
+                    'guardrail_check' => $guardrailCheck['passed'] ? 'passed' : 'warning',
                     'timestamp' => now()->toIso8601String(),
                 ]
             ]);
@@ -413,14 +460,52 @@ class AIDecisionEngine
         } catch (\Exception $e) {
             Log::error("Failed to execute decision #{$decision->id}: " . $e->getMessage());
             
+            // Fallback: Try safe alternative if available
+            $safeFallback = $this->findSafeFallback($decision);
+            
+            if ($safeFallback) {
+                Log::info("Attempting fallback for decision #{$decision->id}: {$safeFallback}");
+                
+                $decision->update([
+                    'execution_result' => [
+                        'status' => 'fallback_applied',
+                        'error' => $e->getMessage(),
+                        'fallback_action' => $safeFallback,
+                        'timestamp' => now()->toIso8601String(),
+                    ]
+                ]);
+                
+                return true; // Fallback successful
+            }
+            
+            // No fallback available
             $decision->update([
                 'execution_result' => [
                     'status' => 'failed',
                     'error' => $e->getMessage(),
+                    'fallback_attempted' => false,
                 ]
             ]);
 
             return false;
         }
+    }
+    
+    /**
+     * Find safe fallback alternative for failed decision
+     */
+    protected function findSafeFallback(AIDecision $decision): ?string
+    {
+        // If decision has alternatives, return the first one with low impact
+        if (!empty($decision->alternatives)) {
+            foreach ($decision->alternatives as $alternative) {
+                if (isset($alternative['impact']) && $alternative['impact'] === 'Low') {
+                    return $alternative['action'];
+                }
+            }
+        }
+        
+        // Default safe fallback: log for manual review
+        return 'Mark for manual review';
     }
 }

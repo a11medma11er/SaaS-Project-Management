@@ -193,6 +193,11 @@
                                     <i class="ri-settings-3-line me-1"></i> Settings
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('ai.guardrails.index') }}" class="nav-link">
+                                    <i class="ri-shield-check-line me-1"></i> Guardrails
+                                </a>
+                            </li>
                             @endcan
                         </ul>
                     </div>
