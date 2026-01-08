@@ -13,11 +13,18 @@ class AISecurityService
      */
     public function sanitizeInput(string $input): string
     {
-        // Remove potential XSS
+        // Remove potential XSS - strip all HTML tags
         $input = strip_tags($input);
         
+        // Additional XSS patterns
+        $input = preg_replace('/javascript:/i', '', $input);
+        $input = preg_replace('/on\w+\s*=/i', '', $input);
+        
         // Remove SQL injection attempts
-        $input = str_replace(['--', ';', 'DROP', 'DELETE'], '', $input);
+        $sqlPatterns = ['--', 'DROP TABLE', 'DROP DATABASE', 'DELETE FROM', 'TRUNCATE'];
+        foreach ($sqlPatterns as $pattern) {
+            $input = str_ireplace($pattern, '', $input);
+        }
         
         // Trim whitespace
         $input = trim($input);
@@ -110,27 +117,27 @@ class AISecurityService
     {
         $suspicious = false;
 
-        // Check for SQL injection patterns
-        $sqlPatterns = ['UNION', 'SELECT', 'DROP', 'INSERT', '--', '/*'];
+        // Check for SQL injection patterns (case-insensitive)
+        $sqlPatterns = ['UNION', 'SELECT', 'DROP', 'INSERT', 'DELETE', '--', '/*', ' OR ', '1=1'];
         foreach ($params as $value) {
             if (is_string($value)) {
                 foreach ($sqlPatterns as $pattern) {
                     if (stripos($value, $pattern) !== false) {
                         $suspicious = true;
-                        $this->logSecurityEvent('sql_injection_attempt', ['value' => $value]);
+                        $this->logSecurityEvent('sql_injection_attempt', ['value' => $value, 'pattern' => $pattern]);
                     }
                 }
             }
         }
 
         // Check for XSS patterns
-        $xssPatterns = ['<script', 'javascript:', 'onerror=', 'onclick='];
+        $xssPatterns = ['<script', 'javascript:', 'onerror=', 'onclick=', 'onload='];
         foreach ($params as $value) {
             if (is_string($value)) {
                 foreach ($xssPatterns as $pattern) {
                     if (stripos($value, $pattern) !== false) {
                         $suspicious = true;
-                        $this->logSecurityEvent('xss_attempt', ['value' => $value]);
+                        $this->logSecurityEvent('xss_attempt', ['value' => $value, 'pattern' => $pattern]);
                     }
                 }
             }

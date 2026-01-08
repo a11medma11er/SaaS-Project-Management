@@ -310,7 +310,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Ahmed Maher**
 - GitHub: [@a11medma11er](https://github.com/a11medma11er)
-- Email: ahmed@example.com
+
 
 ---
 
@@ -323,17 +323,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Chart.js
 - All contributors
 
----
-
-## 📞 Support
-
-For support and questions:
-- 📖 Check [Documentation](docs/)
-- 🐛 [Report Issues](https://github.com/a11medma11er/Project-Management/issues)
-- 💬 [Discussion Forum](https://github.com/a11medma11er/Project-Management/discussions)
 
 ---
 
-**Status:** ✅ Production Ready
 
 **Version:** 2.0.0 | **Last Updated:** January 2026

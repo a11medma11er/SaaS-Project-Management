@@ -104,4 +104,9 @@ Route::middleware(['auth'])->prefix('management')->name('management.')->group(fu
 
 });
 
+// ============================================
+// AI Routes (Centralized Management)
+// ============================================
+require __DIR__ . '/ai.php';
+
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
