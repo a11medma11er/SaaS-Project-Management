@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\AI\AIInsightsController;
 use App\Http\Controllers\Admin\AI\AIAnalyticsController;
 use App\Http\Controllers\Admin\AI\AISafetyController;
 use App\Http\Controllers\Admin\AI\AIFeaturesController;
+use App\Http\Controllers\Admin\AI\AILearningController;
+use App\Http\Controllers\Admin\AI\AIReportingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAIPermission;
 
@@ -80,6 +82,17 @@ Route::prefix('admin/ai')
         Route::middleware(['can:view-ai-analytics'])->group(function () {
             Route::get('/learning', [AILearningController::class, 'index'])->name('learning.index');
             Route::get('/learning/data', [AILearningController::class, 'getData'])->name('learning.data');
+        });
+
+        // ============================================
+        // AI Reporting
+        // ============================================
+        Route::middleware(['can:view-ai-analytics'])->group(function () {
+            Route::get('/reports', [AIReportingController::class, 'index'])->name('reports.index');
+            Route::post('/reports/generate', [AIReportingController::class, 'generate'])->name('reports.generate');
+            Route::post('/reports/export/pdf', [AIReportingController::class, 'exportPDF'])->name('reports.export.pdf');
+            Route::post('/reports/export/excel', [AIReportingController::class, 'exportExcel'])->name('reports.export.excel');
+            Route::get('/reports/comparison', [AIReportingController::class, 'comparison'])->name('reports.comparison');
         });
 
         // ============================================

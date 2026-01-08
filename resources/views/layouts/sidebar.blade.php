@@ -192,6 +192,11 @@
                                     <i class="ri-brain-line me-1"></i> Learning
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('ai.reports.index') }}" class="nav-link">
+                                    <i class="ri-file-chart-line me-1"></i> Reports
+                                </a>
+                            </li>
                             @endcan
                             @endcan
                             @can('manage-ai-settings')
