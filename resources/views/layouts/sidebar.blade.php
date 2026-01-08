@@ -182,8 +182,8 @@
                             @endcan
                             @can('view-ai-analytics')
                             <li class="nav-item">
-                                <a href="{{ route('ai.analytics.index') }}" class="nav-link">
-                                    <i class="ri-bar-chart-box-line me-1"></i> AI Analytics
+                                <a href="{{ route('ai.insights.index') }}" class="nav-link">
+                                    <i class="ri-lightbulb-flash-line me-1"></i> Insights
                                 </a>
                             </li>
                             @endcan
