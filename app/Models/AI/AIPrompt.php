@@ -10,6 +10,8 @@ class AIPrompt extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_prompts';
+
     protected $fillable = [
         'name',
         'type',

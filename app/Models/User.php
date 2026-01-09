@@ -89,4 +89,12 @@ class User extends Authenticatable
             ->withPivot('role', 'joined_at')
             ->withTimestamps();
     }
+    
+    /**
+     * Get all tasks assigned to this user (Alias for assignedTasks)
+     */
+    public function tasks()
+    {
+        return $this->assignedTasks();
+    }
 }

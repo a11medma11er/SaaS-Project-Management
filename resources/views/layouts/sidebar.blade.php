@@ -26,7 +26,7 @@
         </button>
     </div>
 
-    <div id="scrollbar">
+    <div id="scrollbar" class="h-100" data-simplebar>
         <div class="container-fluid">
 
             <div id="two-column-menu">

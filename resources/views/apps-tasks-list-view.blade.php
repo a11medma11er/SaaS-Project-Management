@@ -168,8 +168,8 @@
                     </form>
                 </div>
                 <!--end card-body-->
-                <div class="card-body">
-                    <div class="table-responsive table-card mb-4">
+                <div class="card-body pt-0">
+                    <div class="table-responsive table-card mb-1">
                         <table class="table align-middle table-nowrap mb-0" id="tasksTable">
                             <thead class="table-light text-muted">
                                 <tr>
@@ -285,9 +285,11 @@
                             </div>
                         </div>
                     </div>
+                    <!--end table-responsive-->
+                    
                     @if($tasks->hasPages())
-                    <div class="d-flex justify-content-end mt-2">
-                        {{ $tasks->links() }}
+                    <div class="d-flex justify-content-end mt-3">
+                        {{ $tasks->links('pagination::bootstrap-5') }}
                     </div>
                     @endif
                 </div>

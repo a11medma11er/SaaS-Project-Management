@@ -17,7 +17,7 @@ class AIFeedbackService
         // Update decision with user action
         $decision->update([
             'user_action' => $action,
-            'user_comment' => $comment,
+            'user_feedback' => $comment,
             'reviewed_at' => now(),
             'reviewed_by' => auth()->id(),
         ]);
@@ -285,12 +285,12 @@ class AIFeedbackService
 
             // Common reasons for rejection
             $rejectionReasons = DB::table('ai_decisions')
-                ->select('user_comment')
+                ->select('user_feedback')
                 ->where('user_action', 'rejected')
-                ->whereNotNull('user_comment')
+                ->whereNotNull('user_feedback')
                 ->limit(10)
                 ->get()
-                ->pluck('user_comment')
+                ->pluck('user_feedback')
                 ->toArray();
 
             return [

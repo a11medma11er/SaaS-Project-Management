@@ -75,6 +75,7 @@ Route::prefix('admin/ai')
         // ============================================
         Route::middleware(['can:approve-ai-actions'])->group(function () {
             Route::get('/decisions/{decision}/review', [AIDecisionReviewController::class, 'show'])->name('decisions.review');
+            Route::post('/decisions/bulk-accept', [AIDecisionReviewController::class, 'bulkAccept'])->name('decisions.bulk-accept');
             Route::post('/decisions/{decision}/accept', [AIDecisionReviewController::class, 'accept'])->name('decisions.accept');
             Route::post('/decisions/{decision}/reject', [AIDecisionReviewController::class, 'reject'])->name('decisions.reject');
             Route::post('/decisions/{decision}/modify', [AIDecisionReviewController::class, 'modify'])->name('decisions.modify');

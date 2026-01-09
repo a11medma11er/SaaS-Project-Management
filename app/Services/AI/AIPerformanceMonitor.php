@@ -139,7 +139,7 @@ class AIPerformanceMonitor
             'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2),
             'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
             'memory_limit' => ini_get('memory_limit'),
-            'cpu_load' => sys_getloadavg(),
+            'cpu_load' => function_exists('sys_getloadavg') ? sys_getloadavg() : [0, 0, 0],
         ];
     }
 

@@ -24,8 +24,9 @@ class DemoDataSeeder extends Seeder
             // Get existing users
             $users = User::all();
             
-            if ($users->count() < 4) {
+            if ($users->count() < 10) {
                 $this->command->warn('⚠️  Not enough users. Please run DefaultUserSeeder first.');
+                $this->command->warn('Expected at least 10 users, found: ' . $users->count());
                 return;
             }
 
@@ -40,24 +41,33 @@ class DemoDataSeeder extends Seeder
             
             // In Progress Projects (40%)
             $inProgressProjects = Project::factory()
-                ->count(5)
+                ->count(20)
                 ->inProgress()
                 ->create();
             $projects = $projects->merge($inProgressProjects);
             
             // Completed Projects (30%)
             $completedProjects = Project::factory()
-                ->count(4)
+                ->count(16)
                 ->completed()
                 ->create();
             $projects = $projects->merge($completedProjects);
             
-            // On Hold Projects (30%)
+            // On Hold Projects (20%)
             $onHoldProjects = Project::factory()
-                ->count(3)
+                ->count(10)
                 ->onHold()
                 ->create();
             $projects = $projects->merge($onHoldProjects);
+            
+            // Yet to Start Projects (10%)
+            $yetToStartProjects = Project::factory()
+                ->count(6)
+                ->create([
+                    'status' => 'On Hold',
+                    'progress' => 0,
+                ]);
+            $projects = $projects->merge($yetToStartProjects);
 
             $this->command->info('✅ Created ' . $projects->count() . ' projects');
 
@@ -89,7 +99,7 @@ class DemoDataSeeder extends Seeder
             
             $tasks = collect();
             foreach ($projects as $project) {
-                $taskCount = rand(3, 6);
+                $taskCount = rand(8, 15); // مضاعفة عدد المهام لكل مشروع
                 
                 $projectTasks = Task::factory()
                     ->count($taskCount)
@@ -231,22 +241,55 @@ class DemoDataSeeder extends Seeder
             $this->command->info('✅ Task details added');
 
             // ========================================
-            // PHASE 5: AI Decisions
+            // PHASE 5: AI Decisions (Doubled)
             // ========================================
             $this->command->info('🤖 Creating AI Decisions...');
             
-            $decisions = AIDecision::factory()
-                ->count(20)
-                ->create();
+            // Create AI decisions for tasks (50% of tasks)
+            $tasksForAI = $tasks->random(min((int)($tasks->count() * 0.5), $tasks->count()));
+            foreach ($tasksForAI as $task) {
+                AIDecision::factory()
+                    ->count(rand(1, 2))
+                    ->create([
+                        'task_id' => $task->id,
+                        'project_id' => null,
+                    ]);
+            }
             
-            $this->command->info('✅ Created ' . $decisions->count() . ' AI decisions');
+            // Create AI decisions for projects (40% of projects)
+            $projectsForAI = $projects->random(min((int)($projects->count() * 0.4), $projects->count()));
+            foreach ($projectsForAI as $project) {
+                AIDecision::factory()
+                    ->count(rand(1, 2))
+                    ->create([
+                        'project_id' => $project->id,
+                        'task_id' => null,
+                    ]);
+            }
+            
+            // Create general AI decisions (not linked to specific task/project)
+            AIDecision::factory()
+                ->count(20)
+                ->create([
+                    'task_id' => null,
+                    'project_id' => null,
+                ]);
+            
+            $totalDecisions = AIDecision::count();
+            $this->command->info('✅ Created ' . $totalDecisions . ' AI decisions');
 
             $this->command->info('');
             $this->command->info('🎉 Demo Data Seeding Completed Successfully!');
+            $this->command->info('');
             $this->command->info('📊 Summary:');
+            $this->command->info('   - Users: ' . $users->count());
             $this->command->info('   - Projects: ' . $projects->count());
             $this->command->info('   - Tasks: ' . $tasks->count());
-            $this->command->info('   - AI Decisions: ' . $decisions->count());
+            $this->command->info('   - AI Decisions: ' . AIDecision::count());
+            $this->command->info('   - Project Comments: ' . ProjectComment::count());
+            $this->command->info('   - Task Comments: ' . TaskComment::count());
+            $this->command->info('');
+            $this->command->info('💡 Tip: Login with any user using password: "password"');
         });
     }
 

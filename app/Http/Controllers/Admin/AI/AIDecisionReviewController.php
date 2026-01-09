@@ -74,4 +74,23 @@ class AIDecisionReviewController extends Controller
             'message' => 'Decision reviewed successfully',
         ]);
     }
+    /**
+     * Bulk accept decisions
+     */
+    public function bulkAccept(Request $request)
+    {
+        $request->validate([
+            'decision_ids' => 'required|array',
+            'decision_ids.*' => 'exists:ai_decisions,id',
+        ]);
+
+        AIDecision::whereIn('id', $request->decision_ids)
+            ->where('user_action', 'pending')
+            ->update([
+                'user_action' => 'accepted',
+                'reviewed_at' => now(),
+            ]);
+
+        return redirect()->back()->with('success', 'decisions accepted successfully');
+    }
 }

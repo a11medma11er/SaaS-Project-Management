@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class AIFeaturesController extends Controller
 {
-    public function __construct()
+    protected $aiGateway;
+
+    public function __construct(\App\Services\AI\AIGateway $aiGateway)
     {
         $this->middleware(['auth']);
+        $this->aiGateway = $aiGateway;
     }
 
     /**
@@ -95,7 +98,14 @@ class AIFeaturesController extends Controller
      */
     protected function generateDevelopmentPlan(array $context): array
     {
-        // Simulated AI-based plan generation
+        // Try AI generation first
+        $aiPlan = $this->aiGateway->suggest('development_plan', ['context' => $context]);
+        
+        if ($aiPlan && $this->validatePlanStructure($aiPlan)) {
+            return $aiPlan;
+        }
+
+        // Fallback to simulated generation
         // In production, this would call an actual AI service
         
         $phases = $this->generatePhases($context);
@@ -364,13 +374,19 @@ class AIFeaturesController extends Controller
         try {
             $task = Task::with(['project', 'assignedTo'])->findOrFail($request->task_id);
             
-            $analysis = [
-                'task' => $task->title,
-                'estimated_effort' => $this->estimateEffort($task),
-                'complexity' => $this->analyzeComplexity($task),
-                'dependencies' => $this->findDependencies($task),
-                'recommendations' => $this->generateTaskRecommendations($task),
-            ];
+            $aiAnalysis = $this->aiGateway->suggest('task_analysis', ['context' => $task->toArray()]);
+
+            if ($aiAnalysis) {
+                $analysis = $aiAnalysis;
+            } else {
+                $analysis = [
+                    'task' => $task->title,
+                    'estimated_effort' => $this->estimateEffort($task),
+                    'complexity' => $this->analyzeComplexity($task),
+                    'dependencies' => $this->findDependencies($task),
+                    'recommendations' => $this->generateTaskRecommendations($task),
+                ];
+            }
             
             return response()->json([
                 'success' => true,
@@ -594,6 +610,18 @@ class AIFeaturesController extends Controller
      */
     protected function generateTaskBreakdown(Project $project, string $granularity): array
     {
+        // Try AI generation first
+        $context = [
+            'project' => $project->toArray(),
+            'granularity' => $granularity
+        ];
+        
+        $aiBreakdown = $this->aiGateway->suggest('project_breakdown', ['context' => $context]);
+        
+        if ($aiBreakdown && $this->validateBreakdownStructure($aiBreakdown)) {
+            return $aiBreakdown;
+        }
+
         $taskTemplates = $this->getTaskTemplates($granularity);
         $estimatedTasks = [];
         
@@ -698,8 +726,29 @@ class AIFeaturesController extends Controller
     {
         $total = 0;
         foreach ($breakdown as $category) {
-            $total += count($category['tasks']);
+            if (isset($category['tasks']) && is_array($category['tasks'])) {
+                $total += count($category['tasks']);
+            }
         }
         return $total;
+    }
+
+    /**
+     * Validate plan structure
+     */
+    protected function validatePlanStructure(array $plan): bool
+    {
+        return isset($plan['overview'], $plan['phases']) 
+            && is_array($plan['phases'])
+            && isset($plan['overview']['title'], $plan['overview']['summary']);
+    }
+
+    /**
+     * Validate breakdown structure
+     */
+    protected function validateBreakdownStructure(array $breakdown): bool
+    {
+        return isset($breakdown['categories'], $breakdown['total_estimated_tasks'])
+            && is_array($breakdown['categories']);
     }
 }

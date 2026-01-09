@@ -81,7 +81,7 @@ class AIAnalysisService
     /**
      * Analyze trends over time
      */
-    protected function analyzeTrends(): array
+    public function analyzeTrends(): array
     {
         // Get decision trends for last 30 days
         $decisionTrends = AIDecision::select(

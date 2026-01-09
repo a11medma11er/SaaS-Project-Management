@@ -9,6 +9,8 @@ class AISetting extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_settings';
+
     protected $fillable = [
         'key',
         'value',
