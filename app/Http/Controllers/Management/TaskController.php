@@ -49,41 +49,13 @@ class TaskController extends Controller
             'pending' => Task::where('status', TaskStatus::PENDING->value)->count(),
             'completed' => Task::where('status', TaskStatus::COMPLETED->value)->count(),
             'overdue' => Task::overdue()->count(),
+            'deleted' => Task::onlyTrashed()->count(),
         ];
 
         $projects = Project::select('id', 'title')->orderBy('title')->get();
         $users = User::select('id', 'name', 'avatar')->orderBy('name')->get();
 
         return view('apps-tasks-list-view', compact('tasks', 'stats', 'projects', 'users'));
-    }
-
-    public function kanban()
-    {
-        $this->authorize('view-tasks');
-        
-        // Get tasks grouped by status
-        $tasksByStatus = [
-            'new' => Task::with(['assignedUsers', 'project'])
-                ->where('status', TaskStatus::NEW->value)
-                ->latest()
-                ->get(),
-            'pending' => Task::with(['assignedUsers', 'project'])
-                ->where('status', TaskStatus::PENDING->value)
-                ->latest()
-                ->get(),
-            'in_progress' => Task::with(['assignedUsers', 'project'])
-                ->where('status', TaskStatus::IN_PROGRESS->value)
-                ->latest()
-                ->get(),
-            'completed' => Task::with(['assignedUsers', 'project'])
-                ->where('status', TaskStatus::COMPLETED->value)
-                ->latest()
-                ->get(),
-        ];
-        
-        $users = User::select('id', 'name', 'avatar')->orderBy('name')->get();
-        
-        return view('apps-tasks-kanban', compact('tasksByStatus', 'users'));
     }
 
 
@@ -138,7 +110,9 @@ class TaskController extends Controller
             'timeEntries.user'
         ]);
 
-        return view('apps-tasks-details', compact('task'));
+        $users = User::orderBy('name')->get();
+
+        return view('apps-tasks-details', compact('task', 'users'));
     }
 
     public function edit(Task $task)

@@ -106,7 +106,7 @@
                     <div class="collapse menu-dropdown" id="sidebarTasks">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="{{ route('management.tasks.kanban') }}" class="nav-link">
+                                <a href="{{ route('management.tasks.kanban.index') }}" class="nav-link">
                                     <i class="ri-layout-masonry-line me-1"></i> Kanban Board
                                 </a>
                             </li>

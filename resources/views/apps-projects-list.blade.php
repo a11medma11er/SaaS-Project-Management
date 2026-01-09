@@ -217,7 +217,7 @@
         </div>
         <div class="col-sm-6">
             <div class="pagination-wrap hstack gap-2 justify-content-center justify-content-sm-end">
-                {{ $projects->links() }}
+                {{ $projects->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

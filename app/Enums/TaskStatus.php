@@ -9,6 +9,7 @@ enum TaskStatus: string
     case IN_PROGRESS = 'in_progress';
     case COMPLETED = 'completed';
     case ON_HOLD = 'on_hold';
+    case REVIEW = 'review';
     case CANCELLED = 'cancelled';
 
     /**
@@ -22,6 +23,7 @@ enum TaskStatus: string
             self::IN_PROGRESS => 'In Progress',
             self::COMPLETED => 'Completed',
             self::ON_HOLD => 'On Hold',
+            self::REVIEW => 'Review',
             self::CANCELLED => 'Cancelled',
         };
     }
@@ -37,6 +39,7 @@ enum TaskStatus: string
             self::IN_PROGRESS => 'primary',
             self::COMPLETED => 'success',
             self::ON_HOLD => 'secondary',
+            self::REVIEW => 'info',
             self::CANCELLED => 'danger',
         };
     }

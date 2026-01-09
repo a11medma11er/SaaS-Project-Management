@@ -73,75 +73,30 @@
                     </div>
                 </div>
                 <ul class="list-unstyled vstack gap-3 mb-0">
+                    <?php $__empty_1 = true; $__currentLoopData = $task->assignedUsers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <li>
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
+                                <?php if($user->avatar): ?>
+                                    <img src="<?php echo e(asset('storage/' . $user->avatar)); ?>" alt="" class="avatar-xs rounded-circle">
+                                <?php else: ?>
+                                    <div class="avatar-title bg-secondary-subtle text-secondary rounded-circle avatar-xs">
+                                        <?php echo e(strtoupper(substr($user->name, 0, 1))); ?>
+
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <div class="flex-grow-1 ms-2">
-                                <h6 class="mb-1"><a href="pages-profile">Tonya Noble</a></h6>
-                                <p class="text-muted mb-0">Full Stack Developer</p>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <div class="dropdown">
-                                    <button class="btn btn-icon btn-sm fs-16 text-muted dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ri-more-fill"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill text-muted me-2 align-bottom"></i>View</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-star-fill text-muted me-2 align-bottom"></i>Favorite</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-fill text-muted me-2 align-bottom"></i>Delete</a></li>
-                                    </ul>
-                                </div>
+                                <h6 class="mb-1"><a href="javascript:void(0);"><?php echo e($user->name); ?></a></h6>
+                                <p class="text-muted mb-0"><?php echo e($user->email); ?></p>
                             </div>
                         </div>
                     </li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <li>
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
-                            </div>
-                            <div class="flex-grow-1 ms-2">
-                                <h6 class="mb-1"><a href="pages-profile">Thomas Taylor</a></h6>
-                                <p class="text-muted mb-0">UI/UX Designer</p>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <div class="dropdown">
-                                    <button class="btn btn-icon btn-sm fs-16 text-muted dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ri-more-fill"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill text-muted me-2 align-bottom"></i>View</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-star-fill text-muted me-2 align-bottom"></i>Favorite</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-fill text-muted me-2 align-bottom"></i>Delete</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="text-muted text-center">No members assigned</div>
                     </li>
-                    <li>
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="avatar-xs rounded-circle">
-                            </div>
-                            <div class="flex-grow-1 ms-2">
-                                <h6 class="mb-1"><a href="pages-profile">Nancy Martino</a></h6>
-                                <p class="text-muted mb-0">Web Designer</p>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <div class="dropdown">
-                                    <button class="btn btn-icon btn-sm fs-16 text-muted dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ri-more-fill"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill text-muted me-2 align-bottom"></i>View</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-star-fill text-muted me-2 align-bottom"></i>Favorite</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-fill text-muted me-2 align-bottom"></i>Delete</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div><!--end card-->
@@ -149,98 +104,45 @@
             <div class="card-body">
                 <h5 class="card-title mb-3">Attachments</h5>
                 <div class="vstack gap-2">
+                    <?php $__empty_1 = true; $__currentLoopData = $task->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attachment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
+                            $ext = strtolower(pathinfo($attachment->file_name, PATHINFO_EXTENSION));
+                            $icon = match($ext) {
+                                'zip', 'rar', '7z' => 'ri-folder-zip-line',
+                                'ppt', 'pptx' => 'ri-file-ppt-2-line',
+                                'doc', 'docx' => 'ri-file-word-line',
+                                'xls', 'xlsx', 'csv' => 'ri-file-excel-line',
+                                'pdf' => 'ri-file-pdf-line',
+                                'jpg', 'jpeg', 'png', 'gif', 'svg' => 'ri-image-2-line',
+                                'txt' => 'ri-file-text-line',
+                                default => 'ri-file-line'
+                            };
+                            $size = $attachment->file_size;
+                            $formattedSize = $size > 1048576 ? round($size / 1048576, 2) . ' MB' : round($size / 1024, 2) . ' KB';
+                        ?>
                     <div class="border rounded border-dashed p-2">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0 me-3">
                                 <div class="avatar-sm">
                                     <div class="avatar-title bg-light text-primary rounded fs-24">
-                                        <i class="ri-folder-zip-line"></i>
+                                        <i class="<?php echo e($icon); ?>"></i>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex-grow-1 overflow-hidden">
-                                <h5 class="fs-13 mb-1"><a href="javascript:void(0);" class="text-body text-truncate d-block">App pages.zip</a></h5>
-                                <div>2.2MB</div>
+                                <h5 class="fs-13 mb-1"><a href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" target="_blank" class="text-body text-truncate d-block"><?php echo e($attachment->file_name); ?></a></h5>
+                                <div><?php echo e($formattedSize); ?></div>
                             </div>
                             <div class="flex-shrink-0 ms-2">
                                 <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-icon text-muted btn-sm fs-18"><i class="ri-download-2-line"></i></button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-icon text-muted btn-sm fs-18 dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="ri-more-fill"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Rename</a></li>
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete</a></li>
-                                        </ul>
-                                    </div>
+                                    <a href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" download class="btn btn-icon text-muted btn-sm fs-18"><i class="ri-download-2-line"></i></a>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="border rounded border-dashed p-2">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="avatar-sm">
-                                    <div class="avatar-title bg-light text-primary rounded fs-24">
-                                        <i class="ri-file-ppt-2-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <h5 class="fs-13 mb-1"><a href="javascript:void(0);" class="text-body text-truncate d-block">Velzon admin.ppt</a></h5>
-                                <div>2.4MB</div>
-                            </div>
-                            <div class="flex-shrink-0 ms-2">
-                                <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-icon text-muted btn-sm fs-18"><i class="ri-download-2-line"></i></button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-icon text-muted btn-sm fs-18 dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="ri-more-fill"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Rename</a></li>
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="border rounded border-dashed p-2">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="avatar-sm">
-                                    <div class="avatar-title bg-light text-primary rounded fs-24">
-                                        <i class="ri-folder-zip-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <h5 class="fs-13 mb-1"><a href="javascript:void(0);" class="text-body text-truncate d-block">Images.zip</a></h5>
-                                <div>1.2MB</div>
-                            </div>
-                            <div class="flex-shrink-0 ms-2">
-                                <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-icon text-muted btn-sm fs-18"><i class="ri-download-2-line"></i></button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-icon text-muted btn-sm fs-18 dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="ri-more-fill"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Rename</a></li>
-                                            <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <button type="button" class="btn btn-primary">View more</button>
-                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="text-muted text-center py-2">No attachments</div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div><!--end card-->
@@ -249,51 +151,33 @@
         <div class="card">
             <div class="card-body">
                 <div class="text-muted">
-                    <h6 class="mb-3 fw-semibold text-uppercase">Summary</h6>
-                    <p>It will be as simple as occidental in fact, it will be Occidental. To an English person, it will seem like simplified English, as a skeptical Cambridge friend of mine told me what Occidental is. The European languages are members of the same family. Their separate existence is a myth. For science, music, sport, etc, Europe uses the same vocabulary. The languages only differ in their grammar, their pronunciation and their most common words.</p>
-
                     <h6 class="mb-3 fw-semibold text-uppercase">Sub-tasks</h6>
                     <ul class=" ps-3 list-unstyled vstack gap-2">
+                        <?php $__empty_1 = true; $__currentLoopData = $task->subTasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subTask): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <li>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="productTask">
-                                <label class="form-check-label" for="productTask">
-                                    Product Design, Figma (Software), Prototype
+                                <input class="form-check-input subtask-checkbox" type="checkbox" value="<?php echo e($subTask->id); ?>" id="subTask<?php echo e($subTask->id); ?>" 
+                                    data-url="<?php echo e(route('management.tasks.sub-tasks.toggle', [$task, $subTask])); ?>"
+                                    <?php echo e($subTask->is_completed ? 'checked' : ''); ?>>
+                                <label class="form-check-label <?php echo e($subTask->is_completed ? 'text-decoration-line-through text-muted' : ''); ?>" for="subTask<?php echo e($subTask->id); ?>">
+                                    <?php echo e($subTask->title); ?>
+
                                 </label>
                             </div>
                         </li>
-                        <li>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="dashboardTask" checked>
-                                <label class="form-check-label" for="dashboardTask">
-                                    Dashboards : Ecommerce, Analytics, Project,etc.
-                                </label>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="calenderTask">
-                                <label class="form-check-label" for="calenderTask">
-                                    Create calendar, chat and email app pages
-                                </label>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="authenticationTask">
-                                <label class="form-check-label" for="authenticationTask">
-                                    Add authentication pages
-                                </label>
-                            </div>
-                        </li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <li><div class="text-muted">No sub-tasks</div></li>
+                        <?php endif; ?>
                     </ul>
 
                     <div class="pt-3 border-top border-top-dashed mt-4">
                         <h6 class="mb-3 fw-semibold text-uppercase">Tasks Tags</h6>
                         <div class="hstack flex-wrap gap-2 fs-15">
-                            <div class="badge fw-medium bg-primary-subtle text-primary">UI/UX</div>
-                            <div class="badge fw-medium bg-primary-subtle text-primary">Dashboard</div>
-                            <div class="badge fw-medium bg-primary-subtle text-primary">Design</div>
+                             <?php $__empty_1 = true; $__currentLoopData = $task->tags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <div class="badge fw-medium bg-primary-subtle text-primary"><?php echo e($tag->tag); ?></div>
+                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                <div class="text-muted fs-12">No tags</div>
+                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -305,17 +189,22 @@
                     <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" data-bs-toggle="tab" href="#home-1" role="tab">
-                                Comments (5)
+                                Comments (<?php echo e($task->comments->count()); ?>)
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#messages-1" role="tab">
-                                Attachments File (4)
+                                Attachments File (<?php echo e($task->attachments->count()); ?>)
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#profile-1" role="tab">
-                                Time Entries (9 hrs 13 min)
+                                <?php
+                                   $totalMin = $task->timeEntries->sum('duration_minutes');
+                                   $hrs = floor($totalMin / 60);
+                                   $min = $totalMin % 60;
+                                ?>
+                                Time Entries (<?php echo e($hrs); ?> hrs <?php echo e($min); ?> min)
                             </a>
                         </li>
                     </ul><!--end nav-->
@@ -326,64 +215,65 @@
                     <div class="tab-pane active" id="home-1" role="tabpanel">
                         <h5 class="card-title mb-4">Comments</h5>
                         <div data-simplebar style="height: 508px;" class="px-3 mx-n3 mb-2">
-                            <div class="d-flex mb-4">
-                                <div class="flex-shrink-0">
-                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="fs-13"><a href="pages-profile">Joseph Parker</a> <small class="text-muted">20 Dec 2021 - 05:47AM</small></h5>
-                                    <p class="text-muted">I am getting message from customers that when they place order always get error message .</p>
-                                    <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
-                                    <div class="d-flex mt-4">
-                                        <div class="flex-shrink-0">
-                                            <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h5 class="fs-13"><a href="pages-profile">Tonya Noble</a> <small class="text-muted">22 Dec 2021 - 02:32PM</small></h5>
-                                            <p class="text-muted">Please be sure to check your Spam mailbox to see if your email filters have identified the email from Dell as spam.</p>
-                                            <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
+                             <?php $__empty_1 = true; $__currentLoopData = $task->comments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                         <?php if($comment->user->avatar): ?>
+                                            <img src="<?php echo e(asset('storage/' . $comment->user->avatar)); ?>" alt="" class="avatar-xs rounded-circle" />
+                                         <?php else: ?>
+                                            <div class="avatar-xs rounded-circle bg-secondary-subtle">
+                                                <span class="d-flex align-items-center justify-content-center w-100 h-100 text-secondary fs-10">
+                                                    <?php echo e(strtoupper(substr($comment->user->name, 0, 1))); ?>
+
+                                                </span>
+                                            </div>
+                                         <?php endif; ?>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="fs-13"><a href="javascript:void(0)" class="text-body"><?php echo e($comment->user->name); ?></a> <small class="text-muted"><?php echo e($comment->created_at->format('d M Y - h:i A')); ?></small></h5>
+                                        <p class="text-muted"><?php echo e($comment->comment); ?></p>
+                                        <a href="javascript: void(0);" class="badge text-muted bg-light" onclick="document.getElementById('reply-form-<?php echo e($comment->id); ?>').classList.toggle('d-none')"><i class="mdi mdi-reply"></i> Reply</a>
+                                        
+                                        <!-- Replies -->
+                                        <?php $__currentLoopData = $comment->replies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reply): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="d-flex mt-4">
+                                                <div class="flex-shrink-0">
+                                                    <?php if($reply->user->avatar): ?>
+                                                        <img src="<?php echo e(asset('storage/' . $reply->user->avatar)); ?>" alt="" class="avatar-xs rounded-circle" />
+                                                    <?php else: ?>
+                                                        <div class="avatar-xs rounded-circle bg-secondary-subtle">
+                                                            <span class="d-flex align-items-center justify-content-center w-100 h-100 text-secondary fs-10">
+                                                                <?php echo e(strtoupper(substr($reply->user->name, 0, 1))); ?>
+
+                                                            </span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h5 class="fs-13"><a href="javascript:void(0)" class="text-body"><?php echo e($reply->user->name); ?></a> <small class="text-muted"><?php echo e($reply->created_at->diffForHumans()); ?></small></h5>
+                                                    <p class="text-muted"><?php echo e($reply->comment); ?></p>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                                        <!-- Reply Form -->
+                                        <div class="mt-3 d-none" id="reply-form-<?php echo e($comment->id); ?>">
+                                            <form action="<?php echo e(route('management.tasks.comments.store', $task)); ?>" method="POST">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="parent_id" value="<?php echo e($comment->id); ?>">
+                                                <div class="input-group">
+                                                    <input type="text" name="comment" class="form-control" placeholder="Reply..." required>
+                                                    <button class="btn btn-primary" type="submit">Send</button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="d-flex mb-4">
-                                <div class="flex-shrink-0">
-                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
+                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                <div class="text-center py-4">
+                                    <p class="text-muted">No comments yet.</p>
                                 </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="fs-13"><a href="pages-profile">Thomas Taylor</a> <small class="text-muted">24 Dec 2021 - 05:20PM</small></h5>
-                                    <p class="text-muted">If you have further questions, please contact Customer Support from the “Action Menu” on your <a href="javascript:void(0);" class="text-decoration-underline">Online Order Support</a>.</p>
-                                    <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
-                                </div>
-                            </div>
-                            <div class="d-flex">
-                                <div class="flex-shrink-0">
-                                    <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="fs-13"><a href="pages-profile">Tonya Noble</a> <small class="text-muted">26 min ago</small></h5>
-                                    <p class="text-muted">Your <a href="javascript:void(0)" class="text-decoration-underline">Online Order Support</a> provides you with the most current status of your order. To help manage your order refer to the “Action Menu” to initiate return, contact Customer Support and more.</p>
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-lg-1 col-sm-2 col-6">
-                                            <img src="<?php echo e(URL::asset('build/images/small/img-4.jpg')); ?>" alt="" class="img-fluid rounded">
-                                        </div>
-                                        <div class="col-lg-1 col-sm-2 col-6">
-                                            <img src="<?php echo e(URL::asset('build/images/small/img-5.jpg')); ?>" alt="" class="img-fluid rounded">
-                                        </div>
-                                    </div>
-                                    <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
-                                    <div class="d-flex mt-4">
-                                        <div class="flex-shrink-0">
-                                            <img src="<?php echo e(URL::asset('build/images/users/avatar-6.jpg')); ?>" alt="" class="avatar-xs rounded-circle" />
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h5 class="fs-13"><a href="pages-profile">Nancy Martino</a> <small class="text-muted">8 sec ago</small></h5>
-                                            <p class="text-muted">Other shipping methods are available at checkout if you want your purchase delivered faster.</p>
-                                            <a href="javascript: void(0);" class="badge text-muted bg-light"><i class="mdi mdi-reply"></i> Reply</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                             <?php endif; ?>
                         </div>
                         <form action="<?php echo e(route('management.tasks.comments.store', $task)); ?>" method="POST" class="mt-4">
                             <?php echo csrf_field(); ?>
@@ -411,124 +301,66 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <?php $__empty_1 = true; $__currentLoopData = $task->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attachment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                        <?php
+                                            $ext = strtolower(pathinfo($attachment->file_name, PATHINFO_EXTENSION));
+                                            $icon = match($ext) {
+                                                'zip', 'rar', '7z' => 'ri-file-zip-fill',
+                                                'ppt', 'pptx' => 'ri-file-ppt-fill',
+                                                'doc', 'docx' => 'ri-file-word-fill',
+                                                'xls', 'xlsx', 'csv' => 'ri-file-excel-fill',
+                                                'pdf' => 'ri-file-pdf-fill',
+                                                'jpg', 'jpeg', 'png', 'gif', 'svg' => 'ri-image-2-fill',
+                                                'txt' => 'ri-file-text-fill',
+                                                default => 'ri-file-fill'
+                                            };
+                                            $color = match($ext) {
+                                                'zip', 'rar', '7z' => 'primary',
+                                                'ppt', 'pptx' => 'danger',
+                                                'doc', 'docx' => 'info',
+                                                'xls', 'xlsx', 'csv' => 'success',
+                                                'pdf' => 'danger',
+                                                default => 'secondary'
+                                            };
+                                            $size = $attachment->file_size;
+                                            $formattedSize = $size > 1048576 ? round($size / 1048576, 2) . ' MB' : round($size / 1024, 2) . ' KB';
+                                        ?>
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-sm">
-                                                    <div class="avatar-title bg-primary-subtle text-primary rounded fs-20">
-                                                        <i class="ri-file-zip-fill"></i>
+                                                    <div class="avatar-title bg-<?php echo e($color); ?>-subtle text-<?php echo e($color); ?> rounded fs-20">
+                                                        <i class="<?php echo e($icon); ?>"></i>
                                                     </div>
                                                 </div>
                                                 <div class="ms-3 flex-grow-1">
-                                                    <h6 class="fs-15 mb-0"><a href="javascript:void(0)">App pages.zip</a></h6>
+                                                    <h6 class="fs-15 mb-0"><a href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" target="_blank"><?php echo e($attachment->file_name); ?></a></h6>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>Zip File</td>
-                                        <td>2.22 MB</td>
-                                        <td>21 Dec, 2021</td>
+                                        <td><?php echo e(strtoupper($ext)); ?> File</td>
+                                        <td><?php echo e($formattedSize); ?></td>
+                                        <td><?php echo e($attachment->created_at->format('d M, Y')); ?></td>
                                         <td>
                                             <div class="dropdown">
-                                                <a href="javascript:void(0);" class="btn btn-light btn-icon" id="dropdownMenuLink1" data-bs-toggle="dropdown" aria-expanded="true">
+                                                <a href="javascript:void(0);" class="btn btn-light btn-icon" id="dropdownMenuLink<?php echo e($attachment->id); ?>" data-bs-toggle="dropdown" aria-expanded="true">
                                                     <i class="ri-equalizer-fill"></i>
                                                 </a>
-                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink1" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 23px);">
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill me-2 align-middle text-muted"></i>View</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-download-2-fill me-2 align-middle text-muted"></i>Download</a></li>
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink<?php echo e($attachment->id); ?>">
+                                                    <li><a class="dropdown-item" href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" target="_blank"><i class="ri-eye-fill me-2 align-middle text-muted"></i>View</a></li>
+                                                    <li><a class="dropdown-item" href="<?php echo e(asset('storage/' . $attachment->file_path)); ?>" download><i class="ri-download-2-fill me-2 align-middle text-muted"></i>Download</a></li>
                                                     <li class="dropdown-divider"></li>
+                                                    <!-- Delete not implemented yet properly -->
                                                     <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-line me-2 align-middle text-muted"></i>Delete</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                     </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm">
-                                                    <div class="avatar-title bg-danger-subtle text-danger rounded fs-20">
-                                                        <i class="ri-file-pdf-fill"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="ms-3 flex-grow-1">
-                                                    <h6 class="fs-15 mb-0"><a href="javascript:void(0);">Velzon admin.ppt</a></h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>PPT File</td>
-                                        <td>2.24 MB</td>
-                                        <td>25 Dec, 2021</td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <a href="javascript:void(0);" class="btn btn-light btn-icon" id="dropdownMenuLink2" data-bs-toggle="dropdown" aria-expanded="true">
-                                                    <i class="ri-equalizer-fill"></i>
-                                                </a>
-                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink2" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 23px);">
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill me-2 align-middle text-muted"></i>View</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-download-2-fill me-2 align-middle text-muted"></i>Download</a></li>
-                                                    <li class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-line me-2 align-middle text-muted"></i>Delete</a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
+                                        <td colspan="5" class="text-center">No attachments found</td>
                                     </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm">
-                                                    <div class="avatar-title bg-info-subtle text-info rounded fs-20">
-                                                        <i class="ri-folder-line"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="ms-3 flex-grow-1">
-                                                    <h6 class="fs-15 mb-0"><a href="javascript:void(0);">Images.zip</a></h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>ZIP File</td>
-                                        <td>1.02 MB</td>
-                                        <td>28 Dec, 2021</td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <a href="javascript:void(0);" class="btn btn-light btn-icon" id="dropdownMenuLink3" data-bs-toggle="dropdown" aria-expanded="true">
-                                                    <i class="ri-equalizer-fill"></i>
-                                                </a>
-                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink3" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 23px);">
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill me-2 align-middle"></i>View</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-download-2-fill me-2 align-middle"></i>Download</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-line me-2 align-middle"></i>Delete</a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm">
-                                                    <div class="avatar-title bg-danger-subtle text-danger rounded fs-20">
-                                                        <i class="ri-image-2-fill"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="ms-3 flex-grow-1">
-                                                    <h6 class="fs-15 mb-0"><a href="javascript:void(0);">Bg-pattern.png</a></h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>PNG File</td>
-                                        <td>879 KB</td>
-                                        <td>02 Nov 2021</td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <a href="javascript:void(0);" class="btn btn-light btn-icon" id="dropdownMenuLink4" data-bs-toggle="dropdown" aria-expanded="true">
-                                                    <i class="ri-equalizer-fill"></i>
-                                                </a>
-                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink4" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 23px);">
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-fill me-2 align-middle"></i>View</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-download-2-fill me-2 align-middle"></i>Download</a></li>
-                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-5-line me-2 align-middle"></i>Delete</a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table><!--end table-->
                         </div>
@@ -603,124 +435,52 @@
 <div class="modal fade" id="inviteMembersModal" tabindex="-1" aria-labelledby="inviteMembersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
-            <div class="modal-header p-3 ps-4 bg-primary-subtle">
-                <h5 class="modal-title" id="inviteMembersModalLabel">Team Members</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="search-box mb-3">
-                    <input type="text" class="form-control bg-light border-light" placeholder="Search here...">
-                    <i class="ri-search-line search-icon"></i>
+            <form action="<?php echo e(route('management.tasks.update', $task)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
+                <div class="modal-header p-3 ps-4 bg-primary-subtle">
+                    <h5 class="modal-title" id="inviteMembersModalLabel">Team Members</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <div class="modal-body p-4">
+                    <div class="search-box mb-3">
+                        <input type="text" class="form-control bg-light border-light" placeholder="Search here...">
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
 
-                <div class="mb-4 d-flex align-items-center">
-                    <div class="me-2">
-                        <h5 class="mb-0 fs-13">Members :</h5>
-                    </div>
-                    <div class="avatar-group justify-content-center">
-                        <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Tonya Noble">
-                            <div class="avatar-xs">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-10.jpg')); ?>" alt="" class="rounded-circle img-fluid">
-                            </div>
-                        </a>
-                        <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Thomas Taylor">
-                            <div class="avatar-xs">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-8.jpg')); ?>" alt="" class="rounded-circle img-fluid">
-                            </div>
-                        </a>
-                        <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Nancy Martino">
-                            <div class="avatar-xs">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="rounded-circle img-fluid">
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="mx-n4 px-4" data-simplebar style="max-height: 225px;">
-                    <div class="vstack gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-2.jpg')); ?>" alt="" class="img-fluid rounded-circle">
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Nancy Martino</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
-                        </div>
-                        <!-- end member item -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <div class="avatar-title bg-danger-subtle text-danger rounded-circle">
-                                    HB
+                    <div class="mx-n4 px-4" data-simplebar style="max-height: 225px;">
+                        <div class="vstack gap-3">
+                            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-xs flex-shrink-0 me-3">
+                                    <?php if($user->avatar): ?>
+                                        <img src="<?php echo e(asset('storage/' . $user->avatar)); ?>" alt="" class="img-fluid rounded-circle">
+                                    <?php else: ?>
+                                        <div class="avatar-title bg-secondary-subtle text-secondary rounded-circle">
+                                            <?php echo e(strtoupper(substr($user->name, 0, 1))); ?>
+
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block"><?php echo e($user->name); ?></a></h5>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="assigned_users[]" value="<?php echo e($user->id); ?>" 
+                                            id="user_<?php echo e($user->id); ?>" <?php echo e($task->assignedUsers->contains($user->id) ? 'checked' : ''); ?>>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Henry Baird</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                        <!-- end member item -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-3.jpg')); ?>" alt="" class="img-fluid rounded-circle">
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Frank Hook</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
-                        </div>
-                        <!-- end member item -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-4.jpg')); ?>" alt="" class="img-fluid rounded-circle">
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Jennifer Carter</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
-                        </div>
-                        <!-- end member item -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <div class="avatar-title bg-success-subtle text-success rounded-circle">
-                                    AC
-                                </div>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Alexis Clarke</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
-                        </div>
-                        <!-- end member item -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-xs flex-shrink-0 me-3">
-                                <img src="<?php echo e(URL::asset('build/images/users/avatar-7.jpg')); ?>" alt="" class="img-fluid rounded-circle">
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="fs-13 mb-0"><a href="javascript:void(0);" class="text-body d-block">Joseph Parker</a></h5>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <button type="button" class="btn btn-light btn-sm">Add</button>
-                            </div>
-                        </div>
-                        <!-- end member item -->
                     </div>
-                    <!-- end list -->
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light w-xs" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary w-xs">Assigned</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light w-xs" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary w-xs">Update Assignments</button>
+                </div>
+            </form>
         </div>
         <!-- end modal-content -->
     </div>
@@ -730,6 +490,45 @@
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('script'); ?>
 <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.subtask-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const url = this.dataset.url;
+                const isChecked = this.checked;
+                const label = this.nextElementSibling;
+
+                fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>"
+                    },
+                    body: JSON.stringify({ is_completed: isChecked })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.is_completed) {
+                            label.classList.add('text-decoration-line-through', 'text-muted');
+                        } else {
+                            label.classList.remove('text-decoration-line-through', 'text-muted');
+                        }
+                    } else {
+                        alert('Failed to update subtask');
+                        this.checked = !isChecked; // Revert
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating subtask');
+                    this.checked = !isChecked; // Revert
+                });
+            });
+        });
+    });
+</script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\work\my projects\Git\Project-Management\resources\views/apps-tasks-details.blade.php ENDPATH**/ ?>

@@ -95,11 +95,15 @@ Route::middleware(['auth'])->prefix('management')->name('management.')->group(fu
     
     // Tasks Management
     Route::middleware('can:view-tasks')->group(function () {
-        // Kanban board (must be before resource route)
-        Route::get('tasks/kanban', [App\Http\Controllers\KanbanController::class, 'index'])
-            ->name('tasks.kanban');
-        Route::post('tasks/kanban/update-status', [App\Http\Controllers\KanbanController::class, 'updateStatus'])
-            ->name('tasks.kanban.update');
+        // Kanban Board Routes
+        Route::prefix('tasks/kanban')->name('tasks.kanban.')->group(function () {
+            Route::get('/', [App\Http\Controllers\KanbanController::class, 'index'])->name('index');
+            Route::post('/update-status', [App\Http\Controllers\KanbanController::class, 'updateStatus'])->name('update-status');
+            Route::post('/update-position', [App\Http\Controllers\KanbanController::class, 'updatePosition'])->name('update-position');
+            Route::get('/available-tasks', [App\Http\Controllers\KanbanController::class, 'getAvailableTasks'])->name('available');
+            Route::post('/add-existing-tasks', [App\Http\Controllers\KanbanController::class, 'addExistingTasks'])->name('add-existing');
+            Route::post('/remove-task', [App\Http\Controllers\KanbanController::class, 'removeFromKanban'])->name('remove');
+        });
             
         Route::resource('tasks', App\Http\Controllers\Management\TaskController::class);
         

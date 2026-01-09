@@ -37,13 +37,6 @@
     <div class="card">
         <div class="card-body">
             <div class="row g-2">
-                <div class="col-lg-auto">
-                    <div class="hstack gap-2">
-                        <button class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#createboardModal"><i
-                                class="ri-add-line align-bottom me-1"></i> Create Board</button>
-                    </div>
-                </div>
                 <!--end col-->
                 <div class="col-lg-3 col-auto">
                     <div class="search-box">
@@ -129,8 +122,8 @@
                 </div>
             </div>
             <div class="my-3">
-                <button class="btn btn-soft-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#creatertaskModal">Add More</button>
+                <button class="btn btn-soft-info w-100" data-bs-toggle="modal"
+                    data-bs-target="#addExistingTaskModal" data-target-status="unassigned"><i class="ri-add-circle-line me-1"></i>Add Existing Task</button>
             </div>
         </div>
         <!--end tasks-list-->
@@ -149,8 +142,8 @@
                 </div>
             </div>
             <div class="my-3">
-                <button class="btn btn-soft-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#creatertaskModal">Add More</button>
+                <button class="btn btn-soft-info w-100" data-bs-toggle="modal"
+                    data-bs-target="#addExistingTaskModal" data-target-status="todo"><i class="ri-add-circle-line me-1"></i>Add Existing Task</button>
             </div>
         </div>
         <!--end tasks-list-->
@@ -182,8 +175,8 @@
                 </div>
             </div>
             <div class="my-3">
-                <button class="btn btn-soft-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#creatertaskModal">Add More</button>
+                <button class="btn btn-soft-info w-100" data-bs-toggle="modal"
+                    data-bs-target="#addExistingTaskModal" data-target-status="inprogress"><i class="ri-add-circle-line me-1"></i>Add Existing Task</button>
             </div>
         </div>
         <!--end tasks-list-->
@@ -215,8 +208,8 @@
                 </div>
             </div>
             <div class="my-3">
-                <button class="btn btn-soft-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#creatertaskModal">Add More</button>
+                <button class="btn btn-soft-info w-100" data-bs-toggle="modal"
+                    data-bs-target="#addExistingTaskModal" data-target-status="reviews"><i class="ri-add-circle-line me-1"></i>Add Existing Task</button>
             </div>
         </div>
 
@@ -247,8 +240,8 @@
                 </div>
             </div>
             <div class="my-3">
-                <button class="btn btn-soft-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#creatertaskModal">Add More</button>
+                <button class="btn btn-soft-info w-100" data-bs-toggle="modal"
+                    data-bs-target="#addExistingTaskModal" data-target-status="completed"><i class="ri-add-circle-line me-1"></i>Add Existing Task</button>
             </div>
         </div>
         <!--end tasks-list-->
@@ -332,40 +325,7 @@
             </div>
         </div>
     </div>
-    <!--end add member modal-->
-
-    <div class="modal fade" id="createboardModal" tabindex="-1" aria-labelledby="createboardModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header p-3 bg-primary-subtle">
-                    <h5 class="modal-title" id="createboardModalLabel">Add Board</h5>
-                    <button type="button" class="btn-close" id="addBoardBtn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="#">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <label for="boardName" class="form-label">Board Name</label>
-                                <input type="text" class="form-control" id="boardName"
-                                    placeholder="Enter board name">
-                            </div>
-                            <div class="mt-4">
-                                <div class="hstack gap-2 justify-content-end">
-                                    <button type="button" class="btn btn-light"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary" id="addNewBoard">Add
-                                        Board</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--end add board modal-->
+    
 
     <div class="modal fade" id="creatertaskModal" tabindex="-1" aria-labelledby="creatertaskModalLabel"
         aria-hidden="true">
@@ -508,6 +468,78 @@
     </div>
     <!--end modal -->
 
+    <!-- Add Existing Task Modal -->
+    <div class="modal fade" id="addExistingTaskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0">
+                <div class="modal-header p-3 bg-info-subtle">
+                    <h5 class="modal-title">
+                        <i class="ri-task-line me-2"></i>Add Existing Task
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Filters -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="filterByProject" class="form-label">
+                                <i class="ri-folder-line me-1"></i>Filter by Project
+                            </label>
+                            <select class="form-select" id="filterByProject">
+                                <option value="">All Projects</option>
+                                <?php $__currentLoopData = $projects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $project): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($project->id); ?>"><?php echo e($project->title); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="filterByPriority" class="form-label">
+                                <i class="ri-flag-line me-1"></i>Filter by Priority
+                            </label>
+                            <select class="form-select" id="filterByPriority">
+                                <option value="">All Priorities</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Tasks List -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Available Tasks</label>
+                        <div id="availableTasksList" style="max-height: 400px; overflow-y: auto; border: 1px solid #e9ebec; border-radius: 6px; padding: 10px;">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading tasks...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Tasks Counter -->
+                    <div class="alert alert-info d-none" id="selectedTasksAlert">
+                        <i class="ri-information-line me-2"></i>
+                        Selected <strong id="selectedTasksCount">0</strong> task(s)
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnAddSelectedTasks" disabled>
+                        <i class="ri-add-line me-1"></i>Add Selected Tasks
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end add existing task modal -->
+
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('script'); ?>
     <script src="<?php echo e(URL::asset('build/libs/dragula/dragula.min.js')); ?>"></script>
@@ -537,20 +569,30 @@
                         noTaskImage();
                         taskCounter();
 
-                        // AJAX Update
+                        // AJAX Update using fetch
                         var taskId = el.getAttribute('data-task-id');
                         var newStatusId = target.getAttribute('id');
 
-                        axios.post('<?php echo e(route("management.tasks.kanban.update")); ?>', {
-                            taskId: taskId,
-                            status: newStatusId
+                        fetch('<?php echo e(route("management.tasks.kanban.update-status")); ?>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                taskId: taskId,
+                                status: newStatusId
+                            })
                         })
-                        .then(function (response) {
-                            // console.log('Status updated');
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Status updated:', data);
                         })
-                        .catch(function (error) {
+                        .catch(error => {
                             console.error('Error updating status:', error);
-                            // Optional: Toast error
+                            alert('Error updating task status');
                         });
                     })
                     .on('over', function (el, container) {
@@ -610,6 +652,239 @@
             // Initial Run
             noTaskImage();
             taskCounter();
+
+            // ============================================
+            // ADD EXISTING TASK MODAL FUNCTIONALITY
+            // ============================================
+            const addExistingTaskModal = document.getElementById('addExistingTaskModal');
+            let targetStatus = null;
+            let selectedTasks = [];
+            
+            if (addExistingTaskModal) {
+                // When modal opens
+                addExistingTaskModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    targetStatus = button.getAttribute('data-target-status');
+                    selectedTasks = [];
+                    updateSelectedCounter();
+                    loadAvailableTasks();
+                });
+            }
+            
+            // Load available tasks from server
+            function loadAvailableTasks(projectId = null, priority = null) {
+                const container = document.getElementById('availableTasksList');
+                if (!container) return;
+                
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted mt-2">Loading tasks...</p>
+                    </div>
+                `;
+                
+                // Build URL with params
+                const params = new URLSearchParams();
+                if (projectId) params.append('project_id', projectId);
+                if (priority) params.append('priority', priority);
+                if (targetStatus) params.append('exclude_status', targetStatus);
+                
+                const url = '<?php echo e(route("management.tasks.kanban.available")); ?>' + '?' + params.toString();
+                
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const tasks = data.tasks;
+                    
+                    if (!tasks || tasks.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="ri-inbox-line" style="font-size: 48px; color: #ccc;"></i>
+                                <p class="text-muted mt-2">No available tasks</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div class="list-group list-group-flush">';
+                    tasks.forEach(task => {
+                        const projectName = task.project ? task.project.title : 'No Project';
+                        const priorityColor = task.priority_color || 'secondary';
+                        
+                        html += `
+                            <label class="list-group-item d-flex align-items-center" style="cursor: pointer;">
+                                <input class="form-check-input me-3 task-checkbox" 
+                                       type="checkbox" 
+                                       value="${task.id}"
+                                       data-task-id="${task.id}">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">${task.title}</h6>
+                                            <small class="text-muted">
+                                                <i class="ri-folder-line me-1"></i>${projectName}
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-${priorityColor}-subtle text-${priorityColor}">
+                                            ${task.priority}
+                                        </span>
+                                    </div>
+                                </div>
+                            </label>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    container.innerHTML = html;
+                    attachCheckboxListeners();
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                    container.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="ri-error-warning-line me-2"></i>
+                            Error loading tasks: ${error.message}
+                        </div>
+                    `;
+                });
+            }
+            
+            // Attach checkbox listeners
+            function attachCheckboxListeners() {
+                document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedCounter);
+                });
+            }
+            
+            // Update selected tasks counter
+            function updateSelectedCounter() {
+                selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
+                    .map(cb => cb.value);
+                
+                const count = selectedTasks.length;
+                const alert = document.getElementById('selectedTasksAlert');
+                const btn = document.getElementById('btnAddSelectedTasks');
+                const countSpan = document.getElementById('selectedTasksCount');
+                
+                if (countSpan) countSpan.textContent = count;
+                
+                if (count > 0) {
+                    if (alert) alert.classList.remove('d-none');
+                    if (btn) btn.disabled = false;
+                } else {
+                    if (alert) alert.classList.add('d-none');
+                    if (btn) btn.disabled = true;
+                }
+            }
+            
+            // Filter by Project
+            const filterByProject = document.getElementById('filterByProject');
+            if (filterByProject) {
+                filterByProject.addEventListener('change', function() {
+                    const projectId = this.value;
+                    const priority = document.getElementById('filterByPriority')?.value;
+                    loadAvailableTasks(projectId, priority);
+                });
+            }
+            
+            // Filter by Priority
+            const filterByPriority = document.getElementById('filterByPriority');
+            if (filterByPriority) {
+                filterByPriority.addEventListener('change', function() {
+                    const priority = this.value;
+                    const projectId = document.getElementById('filterByProject')?.value;
+                    loadAvailableTasks(projectId, priority);
+                });
+            }
+            
+            // Add Selected Tasks
+            const btnAddSelected = document.getElementById('btnAddSelectedTasks');
+            if (btnAddSelected) {
+                btnAddSelected.addEventListener('click', function() {
+                    if (selectedTasks.length === 0) return;
+                    
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+                    
+                    fetch('<?php echo e(route("management.tasks.kanban.add-existing")); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            task_ids: selectedTasks,
+                            target_status: targetStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Reload page to show updated tasks
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error adding tasks:', error);
+                        alert('Error adding tasks');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="ri-add-line me-1"></i>Add Selected Tasks';
+                    });
+                });
+            }
+
+            // ============================================
+            // REMOVE FROM KANBAN FUNCTIONALITY
+            // ============================================
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-from-kanban')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.remove-from-kanban');
+                    const taskId = btn.getAttribute('data-task-id');
+                    
+                    if (!confirm('Are you sure you want to remove this task from the Kanban board?')) {
+                        return;
+                    }
+                    
+                    fetch('<?php echo e(route("management.tasks.kanban.remove")); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            task_id: taskId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the task card from DOM
+                            const taskCard = btn.closest('.tasks-box');
+                            if (taskCard) {
+                                taskCard.remove();
+                                noTaskImage();
+                                taskCounter();
+                            }
+                        } else {
+                            alert(data.message || 'Error removing task');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error removing task from kanban');
+                    });
+                }
+            });
         });
     </script>
 <?php $__env->stopSection(); ?>

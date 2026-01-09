@@ -24,6 +24,9 @@ class Task extends Model
         'due_date',
         'status',
         'priority',
+        'progress',
+        'position',
+        'kanban_status',  // Separate column for Kanban board
         'created_by',
     ];
 
@@ -106,6 +109,14 @@ class Task extends Model
         });
     }
 
+    /**
+     * Scope for Kanban board ordering (by position within status)
+     */
+    public function scopeKanbanOrder($query)
+    {
+        return $query->orderBy('position', 'asc')
+                     ->orderBy('created_at', 'desc');
+    }
 
     // Auto-generate task number
     protected static function boot()
@@ -118,6 +129,18 @@ class Task extends Model
                 $maxId = \DB::table('tasks')->max('id') ?? 0;
                 $nextNumber = $maxId + 1;
                 $task->task_number = '#VLZ' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            }
+        });
+
+        static::saved(function ($task) {
+            if ($task->project_id) {
+                $task->project?->calculateProgress();
+            }
+        });
+
+        static::deleted(function ($task) {
+            if ($task->project_id) {
+                $task->project?->calculateProgress();
             }
         });
     }

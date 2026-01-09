@@ -330,7 +330,31 @@
                         </div>
                     </div>
                     <div class="mx-n4 px-4" data-simplebar style="max-height: 225px;">
+                        <div class="vstack gap-3">
+                            @foreach($users as $user)
+                                <div class="d-flex align-items-center member-item" data-user-name="{{ $user->name }}">
+                                    <div class="avatar-xs flex-shrink-0 me-3">
+                                        @if($user->avatar)
+                                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="" class="img-fluid rounded-circle">
+                                        @else
+                                            <div class="avatar-title bg-secondary-subtle text-secondary rounded-circle">
+                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="fs-13 mb-0"><a href="#" class="text-body d-block">{{ $user->name }}</a></h5>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="button" class="btn btn-light btn-sm add-member-btn" 
+                                            data-user-id="{{ $user->id }}" 
+                                            data-user-name="{{ $user->name }}"
+                                            data-user-avatar="{{ $user->avatar ? asset('storage/' . $user->avatar) : '' }}">Add</button>
+                                    </div>
                                 </div>
+                            @endforeach
+                        </div>
+                    </div>
                             </div>
                             <!-- end member item -->
                         </div>

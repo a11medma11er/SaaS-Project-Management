@@ -68,6 +68,37 @@ class Project extends Model
     }
 
     /**
+     * Get all tasks for the project
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    /**
+     * Calculate and update project progress based on tasks
+     */
+    public function calculateProgress()
+    {
+        $totalTasks = $this->tasks()->count();
+        
+        if ($totalTasks == 0) {
+            $this->progress = 0;
+        } else {
+            $completedTasks = $this->tasks()
+                ->where(function($q) {
+                    $q->where('kanban_status', 'completed')
+                      ->orWhere('status', \App\Enums\TaskStatus::COMPLETED);
+                })
+                ->count();
+            
+            $this->progress = round(($completedTasks / $totalTasks) * 100);
+        }
+        
+        $this->saveQuietly(); // Use saveQuietly to avoid triggering events if any
+    }
+
+    /**
      * Get all members of the project
      */
     public function members()

@@ -11,6 +11,12 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink<?php echo e($task->id); ?>">
                     <li><a class="dropdown-item" href="<?php echo e(route('management.tasks.show', $task->id)); ?>"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</a></li>
                     <li><a class="dropdown-item" href="<?php echo e(route('management.tasks.edit', $task->id)); ?>"><i class="ri-edit-2-line align-bottom me-2 text-muted"></i> Edit</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-warning remove-from-kanban" href="javascript:void(0)" data-task-id="<?php echo e($task->id); ?>">
+                            <i class="ri-close-circle-line align-bottom me-2"></i> Remove from Kanban
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
