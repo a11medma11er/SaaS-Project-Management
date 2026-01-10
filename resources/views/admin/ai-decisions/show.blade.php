@@ -243,27 +243,73 @@
 
 <!-- Modify Modal -->
 <div class="modal fade" id="modifyModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form action="{{ route('ai.decisions.modify', $decision->id) }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Modify Recommendation</h5>
+                    <h5 class="modal-title"><i class="ri-edit-line"></i> Modify Recommendation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- Original Recommendation -->
                     <div class="mb-3">
-                        <label class="form-label">Modified Recommendation</label>
-                        <textarea class="form-control" name="modified_recommendation" rows="4" required 
-                                  placeholder="Enter your modified recommendation...">{{ old('modified_recommendation', $decision->recommendation) }}</textarea>
+                        <label class="form-label fw-bold">Original AI Recommendation</label>
+                        <div class="alert alert-light border">
+                            <i class="ri-lightbulb-line text-warning"></i> {{ $decision->recommendation }}
+                        </div>
                     </div>
-                    <div class="alert alert-info">
-                        <small><i class="ri-information-line"></i> The modified recommendation will be executed instead of the original.</small>
+
+                    <!-- Modified Recommendation Input -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Modified Recommendation <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" name="modified_recommendation" rows="4" required 
+                                  placeholder="Enter a clear, actionable recommendation...">{{ old('modified_recommendation', $decision->recommendation) }}</textarea>
+                        <small class="text-muted">
+                            Write a clear action in imperative form (e.g., "Send reminder", "Extend deadline by 3 days")
+                        </small>
+                    </div>
+
+                    <!-- Format Guidelines -->
+                    <div class="card border-info mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-2">
+                                <i class="ri-information-line text-info"></i> Format Guidelines | إرشادات الصيغة
+                            </h6>
+                            <p class="mb-2 small"><strong>Expected Format:</strong> Clear, actionable statement (max 500 characters)</p>
+                            
+                            <p class="mb-1 small fw-bold">✅ Good Examples:</p>
+                            <ul class="small mb-2" style="line-height: 1.8;">
+                                <li><code>Escalate task priority - 5 days overdue</code></li>
+                                <li><code>Request status update from assigned user</code></li>
+                                <li><code>Extend deadline by 2 weeks and notify stakeholders</code></li>
+                                <li><code>Reassign task to available team member</code></li>
+                                <li><code>Mark task as blocked and schedule review meeting</code></li>
+                            </ul>
+
+                            <p class="mb-1 small fw-bold">❌ Avoid:</p>
+                            <ul class="small mb-0" style="line-height: 1.8;">
+                                <li>Vague statements: ~~"Do something about this task"~~</li>
+                                <li>Questions: ~~"Should we extend the deadline?"~~</li>
+                                <li>Multiple unrelated actions in one recommendation</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Execution Warning -->
+                    <div class="alert alert-warning mb-0">
+                        <i class="ri-alert-line"></i> <strong>Note:</strong> The modified recommendation will be executed immediately after approval. Make sure it's clear and actionable.
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-info">Modify & Execute</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="ri-check-line"></i> Modify & Execute
+                    </button>
                 </div>
             </form>
         </div>

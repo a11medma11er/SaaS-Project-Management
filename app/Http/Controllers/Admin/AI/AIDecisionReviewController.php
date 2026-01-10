@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Admin\AI;
 
 use App\Http\Controllers\Controller;
 use App\Models\AI\AIDecision;
+use App\Services\AI\AIDecisionEngine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AIDecisionReviewController extends Controller
 {
-    public function __construct()
+    protected $decisionEngine;
+
+    public function __construct(AIDecisionEngine $decisionEngine)
     {
-        $this->middleware(['auth', 'can:manage-ai-decisions']);
+        $this->decisionEngine = $decisionEngine;
     }
 
     /**
@@ -18,7 +22,8 @@ class AIDecisionReviewController extends Controller
      */
     public function index()
     {
-        $pending = AIDecision::where('user_action', null)
+        $pending = AIDecision::where('user_action', 'pending')
+            ->with(['task', 'project'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -26,17 +31,50 @@ class AIDecisionReviewController extends Controller
     }
 
     /**
-     * Accept a decision
+     * Show decision for review
+     */
+    public function show(AIDecision $decision)
+    {
+        $decision->load(['task', 'project']);
+        return view('admin.ai-decisions.show', compact('decision'));
+    }
+
+    /**
+     * Accept a decision and execute it
      */
     public function accept(Request $request, AIDecision $decision)
     {
-        $decision->update([
-            'user_action' => 'accepted',
-            'user_feedback' => $request->input('feedback'),
-            'reviewed_at' => now(),
-        ]);
+        try {
+            // Update decision status
+            $decision->update([
+                'user_action' => 'accepted',
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+            ]);
 
-        return redirect()->back()->with('success', 'Decision accepted successfully');
+            // Execute the decision
+            $executed = $this->decisionEngine->executeDecision($decision);
+
+            // Log activity
+            activity('ai')
+                ->causedBy(auth()->user())
+                ->performedOn($decision)
+                ->withProperties(['action' => 'accepted', 'executed' => $executed])
+                ->log('decision_accepted');
+
+            $message = $executed 
+                ? 'Decision accepted and executed successfully!'
+                : 'Decision accepted but execution failed. Check logs for details.';
+
+            return redirect()
+                ->route('ai.decisions.show', $decision->id)
+                ->with($executed ? 'success' : 'warning', $message);
+
+        } catch (\Exception $e) {
+            Log::error("Failed to accept decision #{$decision->id}: " . $e->getMessage());
+            
+            return back()->withErrors(['error' => 'Failed to accept decision: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -44,53 +82,132 @@ class AIDecisionReviewController extends Controller
      */
     public function reject(Request $request, AIDecision $decision)
     {
-        $decision->update([
-            'user_action' => 'rejected',
-            'user_feedback' => $request->input('feedback'),
-            'reviewed_at' => now(),
+        $validated = $request->validate([
+            'rejection_reason' => 'nullable|string|max:1000',
         ]);
 
-        return redirect()->back()->with('success', 'Decision rejected');
+        try {
+            // Update decision status
+            $decision->update([
+                'user_action' => 'rejected',
+                'user_feedback' => $validated['rejection_reason'] ?? null,
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+            ]);
+
+            // Log activity
+            activity('ai')
+                ->causedBy(auth()->user())
+                ->performedOn($decision)
+                ->withProperties([
+                    'action' => 'rejected',
+                    'reason' => $validated['rejection_reason'] ?? null
+                ])
+                ->log('decision_rejected');
+
+            return redirect()
+                ->route('ai.decisions.index')
+                ->with('success', 'Decision rejected successfully!');
+
+        } catch (\Exception $e) {
+            Log::error("Failed to reject decision #{$decision->id}: " . $e->getMessage());
+            
+            return back()->withErrors(['error' => 'Failed to reject decision.']);
+        }
     }
 
     /**
-     * Mark as reviewed
+     * Modify and execute decision
      */
-    public function review(Request $request, AIDecision $decision)
+    public function modify(Request $request, AIDecision $decision)
     {
-        $request->validate([
-            'action' => 'required|in:accepted,rejected',
-            'feedback' => 'nullable|string|max:500',
+        $validated = $request->validate([
+            'modified_recommendation' => 'required|string|max:500',
         ]);
 
-        $decision->update([
-            'user_action' => $request->action,
-            'user_feedback' => $request->feedback,
-            'reviewed_at' => now(),
-        ]);
+        try {
+            // Update decision
+            $decision->update([
+                'user_action' => 'modified',
+                'user_feedback' => $validated['modified_recommendation'],
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Decision reviewed successfully',
-        ]);
+            // Execute modified decision
+            $executed = $this->decisionEngine->executeDecision(
+                $decision,
+                $validated['modified_recommendation']
+            );
+
+            // Log activity
+            activity('ai')
+                ->causedBy(auth()->user())
+                ->performedOn($decision)
+                ->withProperties([
+                    'action' => 'modified',
+                    'modified_recommendation' => $validated['modified_recommendation'],
+                    'executed' => $executed
+                ])
+                ->log('decision_modified');
+
+            return redirect()
+                ->route('ai.decisions.show', $decision->id)
+                ->with('success', 'Decision modified and executed successfully!');
+
+        } catch (\Exception $e) {
+            Log::error("Failed to modify decision #{$decision->id}: " . $e->getMessage());
+            
+            return back()->withErrors(['error' => 'Failed to modify decision.']);
+        }
     }
+
     /**
      * Bulk accept decisions
      */
     public function bulkAccept(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'decision_ids' => 'required|array',
             'decision_ids.*' => 'exists:ai_decisions,id',
         ]);
 
-        AIDecision::whereIn('id', $request->decision_ids)
-            ->where('user_action', 'pending')
-            ->update([
-                'user_action' => 'accepted',
-                'reviewed_at' => now(),
-            ]);
+        try {
+            $accepted = 0;
+            $failed = 0;
 
-        return redirect()->back()->with('success', 'decisions accepted successfully');
+            foreach ($validated['decision_ids'] as $decisionId) {
+                $decision = AIDecision::find($decisionId);
+                
+                if ($decision && $decision->user_action === 'pending') {
+                    $decision->update([
+                        'user_action' => 'accepted',
+                        'reviewed_by' => auth()->id(),
+                        'reviewed_at' => now(),
+                    ]);
+                    
+                    if ($this->decisionEngine->executeDecision($decision)) {
+                        $accepted++;
+                    } else {
+                        $failed++;
+                    }
+                }
+            }
+
+            $message = "Accepted {$accepted} decision(s)";
+            if ($failed > 0) {
+                $message .= " ({$failed} failed execution)";
+            }
+
+            return redirect()
+                ->route('ai.decisions.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error("Bulk accept failed: " . $e->getMessage());
+            
+            return back()->withErrors(['error' => 'Bulk operation failed.']);
+        }
     }
 }
+
