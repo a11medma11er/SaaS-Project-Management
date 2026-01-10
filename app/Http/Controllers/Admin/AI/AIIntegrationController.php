@@ -32,7 +32,7 @@ class AIIntegrationController extends Controller
     public function testProvider(Request $request)
     {
         $request->validate([
-            'provider' => 'required|in:openai,claude,local',
+            'provider' => 'required|in:openai,gemini,openrouter,claude,local',
             'prompt' => 'required|string|max:500',
         ]);
 

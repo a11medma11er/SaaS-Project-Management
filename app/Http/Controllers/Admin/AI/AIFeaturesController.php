@@ -37,13 +37,17 @@ class AIFeaturesController extends Controller
         ]);
 
         try {
-            $project = Project::with(['tasks', 'team'])->findOrFail($request->project_id);
+            $project = Project::with(['tasks', 'members'])->findOrFail($request->project_id);
             
             // Analyze project context
             $context = $this->analyzeProjectContext($project, $request->requirements);
             
             // Generate development plan
             $plan = $this->generateDevelopmentPlan($context);
+            
+            // Get AI provider info for transparency
+            $aiGateway = app(\App\Services\AI\AIGateway::class);
+            $modelInfo = $aiGateway->getModelInfo();
             
             // Log activity
             activity('ai')
@@ -56,6 +60,7 @@ class AIFeaturesController extends Controller
                 'success' => true,
                 'plan' => $plan,
                 'project' => $project->title,
+                'ai_info' => $modelInfo, // معلومات المزود
             ]);
             
         } catch (\Exception $e) {
@@ -84,7 +89,7 @@ class AIFeaturesController extends Controller
             'project_description' => $project->description,
             'budget' => $project->budget,
             'deadline' => $project->end_date,
-            'team_size' => $project->team()->count(),
+            'team_size' => $project->members()->count(),
             'existing_tasks' => $existingTasks,
             'completed_tasks' => $completedTasks,
             'progress' => $progress,
@@ -499,20 +504,36 @@ class AIFeaturesController extends Controller
     }
 
     /**
-     * Generate study content
+     * Generate study content using AI
      */
     protected function generateStudy(Project $project, string $type): array
     {
-        switch ($type) {
-            case 'feasibility':
-                return $this->generateFeasibilityStudy($project);
-            case 'technical':
-                return $this->generateTechnicalStudy($project);
-            case 'risk':
-                return $this->generateRiskStudy($project);
-            default:
-                return [];
+        // Try to use AI first
+        $aiStudy = $this->aiGateway->suggest($type . '_study', [
+            'context' => [
+                'project_title' => $project->title,
+                'project_description' => $project->description,
+                'project_budget' => $project->budget,
+                'project_deadline' => $project->deadline,
+                'team_size' => $project->members()->count(),
+                'total_tasks' => $project->tasks()->count(),
+                'completed_tasks' => $project->tasks()->where('status', 'completed')->count(),
+                'study_type' => $type,
+            ]
+        ]);
+
+        // If AI returned results, use them
+        if ($aiStudy && isset($aiStudy['analysis'])) {
+            return $aiStudy['analysis'];
         }
+
+        // Fallback to template-based studies
+        return match($type) {
+            'feasibility' => $this->generateFeasibilityStudy($project),
+            'technical' => $this->generateTechnicalStudy($project),
+            'risk' => $this->generateRiskStudy($project),
+            default => [],
+        };
     }
 
     /**

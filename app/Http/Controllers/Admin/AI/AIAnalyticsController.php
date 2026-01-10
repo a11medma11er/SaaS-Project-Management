@@ -23,7 +23,15 @@ class AIAnalyticsController extends Controller
     {
         $analytics = $this->analyticsEngine->generateReport();
 
-        return view('admin.ai-analytics.index', compact('analytics'));
+        // Add Insights data (recent decisions)
+        $insights = [
+            'recent_decisions' => \App\Models\AI\AIDecision::with(['task', 'project'])
+                ->latest()
+                ->take(10)
+                ->get(),
+        ];
+
+        return view('admin.ai-analytics.index', compact('analytics', 'insights'));
     }
 
     /**

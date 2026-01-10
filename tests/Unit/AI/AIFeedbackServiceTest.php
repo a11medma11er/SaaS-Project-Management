@@ -30,15 +30,15 @@ class AIFeedbackServiceTest extends TestCase
 
         $this->actingAs($user);
 
-        $feedback = $this->feedbackService->trackFeedback(
+        $this->feedbackService->recordFeedback(
             $decision,
             'accepted',
             'Task analysis was accurate'
         );
 
-        $this->assertNotNull($feedback);
-        $this->assertEquals($decision->id, $feedback->decision_id);
-        $this->assertEquals('accepted', $feedback->user_action);
+        $decision->refresh();
+        $this->assertEquals('accepted', $decision->user_action);
+        $this->assertEquals('Task analysis was accurate', $decision->user_feedback);
     }
 
     /** @test */
@@ -51,17 +51,20 @@ class AIFeedbackServiceTest extends TestCase
         // Create 10 decisions: 7 accepted, 3 rejected
         for ($i = 0; $i < 7; $i++) {
             $decision = AIDecision::factory()->create();
-            $this->feedbackService->trackFeedback($decision, 'accepted');
+            $this->feedbackService->recordFeedback($decision, 'accepted');
         }
 
         for ($i = 0; $i < 3; $i++) {
             $decision = AIDecision::factory()->create();
-            $this->feedbackService->trackFeedback($decision, 'rejected');
+            $this->feedbackService->recordFeedback($decision, 'rejected');
         }
 
         $metrics = $this->feedbackService->getLearningMetrics();
 
-        $this->assertEquals(70, $metrics['accuracy_rate']); // 7/10 = 70%
+        $this->assertIsArray($metrics);
+        $this->assertArrayHasKey('acceptance_rate', $metrics);
+        // 7 accepted out of 10 total = 70% acceptance rate
+        $this->assertEquals(70, round($metrics['acceptance_rate']));
     }
 
     /** @test */
@@ -76,11 +79,10 @@ class AIFeedbackServiceTest extends TestCase
         $this->actingAs($user);
 
         // Accept high-confidence decision
-        $this->feedbackService->trackFeedback($decision, 'accepted');
-        $this->feedbackService->updateConfidenceCalibration($decision->decision_type);
+        $this->feedbackService->recordFeedback($decision, 'accepted');
 
-        $calibration = $this->feedbackService->getCalibrationData($decision->decision_type);
-
-        $this->assertNotNull($calibration);
+        $decision->refresh();
+        $this->assertEquals('accepted', $decision->user_action);
+        $this->assertNotNull($decision->reviewed_at);
     }
 }

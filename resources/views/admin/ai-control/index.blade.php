@@ -47,8 +47,20 @@
                     <i class="ri-robot-line"></i> AI Control Panel
                 </h4>
 
-                <!-- AI System Toggle -->
-                <div class="page-title-right">
+                <div class="page-title-right d-flex align-items-center gap-3">
+                    <!-- AI Provider Selector -->
+                    <div class="d-flex align-items-center">
+                        <label class="me-2 mb-0 text-muted small">Provider:</label>
+                        <select class="form-select form-select-sm" id="aiProviderSelect" style="width: 150px;" onchange="changeAIProvider(this.value)">
+                            <option value="local" {{ $ai_provider === 'local' ? 'selected' : '' }}>🏠 Local (Fallback)</option>
+                            <option value="openai" {{ $ai_provider === 'openai' ? 'selected' : '' }}>🤖 OpenAI</option>
+                            <option value="gemini" {{ $ai_provider === 'gemini' ? 'selected' : '' }}>✨ Google Gemini</option>
+                            <option value="openrouter" {{ $ai_provider === 'openrouter' ? 'selected' : '' }}>🌐 OpenRouter</option>
+                            <option value="claude" {{ $ai_provider === 'claude' ? 'selected' : '' }}>🧠 Claude</option>
+                        </select>
+                    </div>
+                    
+                    <!-- AI System Toggle -->
                     <div class="form-check form-switch form-switch-lg">
                         <input class="form-check-input ai-toggle" type="checkbox" 
                                id="aiSystemToggle"
@@ -62,6 +74,26 @@
             </div>
         </div>
     </div>
+
+    <!-- Main Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs nav-tabs-custom mb-3" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#dashboard-tab" role="tab">
+                        <i class="ri-dashboard-line me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#settings-tab" role="tab">
+                        <i class="ri-settings-3-line me-1"></i> Settings
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane active" id="dashboard-tab" role="tabpanel">
 
     <!-- Key Metrics Cards -->
     <div class="row">
@@ -313,14 +345,6 @@
                         </div>
                         @endcan
 
-                        @can('manage-ai-settings')
-                        <div class="col-lg-3 col-md-6">
-                            <a href="{{ route('ai.settings.index') }}" class="btn btn-soft-warning w-100">
-                                <i class="ri-settings-3-line"></i> AI Settings
-                            </a>
-                        </div>
-                        @endcan
-
                         @can('view-ai-analytics')
                         <div class="col-lg-3 col-md-6">
                             <a href="{{ route('ai.analytics.index') }}" class="btn btn-soft-success w-100">
@@ -333,32 +357,162 @@
             </div>
         </div>
     </div>
+
+                </div><!-- End Dashboard Tab -->
+
+                <!-- Settings Tab -->
+                <div class="tab-pane" id="settings-tab" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills nav-justified mb-3" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#general" role="tab">
+                                        <i class="ri-settings-line me-1"></i> General
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#safety" role="tab">
+                                        <i class="ri-shield-line me-1"></i> Safety
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#performance" role="tab">
+                                        <i class="ri-speed-line me-1"></i> Performance
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <form id="settingsForm">
+                                @csrf
+                                <div class="tab-content p-3 text-muted">
+                                    <!-- General Settings -->
+                                    <div class="tab-pane active" id="general" role="tabpanel">
+                                        @foreach($settings['general'] ?? [] as $setting)
+                                        <div class="mb-3 row">
+                                            <label class="col-md-3 col-form-label">{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control setting-input" 
+                                                    name="settings[{{ $loop->index }}][value]" 
+                                                    value="{{ $setting->value }}">
+                                                <input type="hidden" name="settings[{{ $loop->index }}][key]" value="{{ $setting->key }}">
+                                                <input type="hidden" name="settings[{{ $loop->index }}][group]" value="general">
+                                                @if($setting->description)
+                                                    <p class="text-muted mb-0"><small>{{ $setting->description }}</small></p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @if(empty($settings['general']) || count($settings['general']) === 0)
+                                            <p class="text-muted">No general settings found.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Safety Settings -->
+                                    <div class="tab-pane" id="safety" role="tabpanel">
+                                        @foreach($settings['safety'] ?? [] as $setting)
+                                        <div class="mb-3 row">
+                                            <label class="col-md-3 col-form-label">{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control setting-input" 
+                                                    name="settings[{{ $loop->index + 1000 }}][value]" 
+                                                    value="{{ $setting->value }}">
+                                                <input type="hidden" name="settings[{{ $loop->index + 1000 }}][key]" value="{{ $setting->key }}">
+                                                <input type="hidden" name="settings[{{ $loop->index + 1000 }}][group]" value="safety">
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @if(empty($settings['safety']) || count($settings['safety']) === 0)
+                                            <p class="text-muted">No safety settings found.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Performance Settings -->
+                                    <div class="tab-pane" id="performance" role="tabpanel">
+                                        @foreach($settings['performance'] ?? [] as $setting)
+                                        <div class="mb-3 row">
+                                            <label class="col-md-3 col-form-label">{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control setting-input" 
+                                                    name="settings[{{ $loop->index + 2000 }}][value]" 
+                                                    value="{{ $setting->value }}">
+                                                <input type="hidden" name="settings[{{ $loop->index + 2000 }}][key]" value="{{ $setting->key }}">
+                                                <input type="hidden" name="settings[{{ $loop->index + 2000 }}][group]" value="performance">
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @if(empty($settings['performance']) || count($settings['performance']) === 0)
+                                            <p class="text-muted">No performance settings found.</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12 text-end">
+                                        <button type="submit" class="btn btn-primary" id="saveSettingsBtn">
+                                            <i class="ri-save-line"></i> Save Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div><!-- End Settings Tab -->
+
+            </div><!-- End tab-content -->
+        </div>
+    </div>
+
 </div>
 @endsection
 
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+// Configure Axios with CSRF token
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
 function toggleAISystem(enabled) {
     const toggle = document.getElementById('aiSystemToggle');
+    const label = toggle.nextElementSibling;
     toggle.disabled = true;
 
     axios.post('{{ route("ai.control.toggle") }}', {
-        enabled: enabled,
-        _token: '{{ csrf_token() }}'
+        enabled: enabled
     })
     .then(response => {
-        toastr.success(response.data.message);
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
+        if (response.data.success) {
+            console.log('✅ ' + response.data.message);
+            // Update label immediately
+            if (label) {
+                label.innerHTML = '<strong>AI System ' + (enabled ? 'Enabled' : 'Disabled') + '</strong>';
+            }
+            // Reload page to show updated data
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
     })
     .catch(error => {
-        console.error('Toggle failed:', error);
+        console.error('❌ Toggle failed:', error);
         toggle.checked = !enabled; // Revert toggle
-        toastr.error('Failed to toggle AI system. Please try again.');
-    })
-    .finally(() => {
+        
+        // Display error message as alert
+        let errorMessage = 'Failed to toggle AI system. ';
+        
+        if (error.response) {
+            if (error.response.status === 419) {
+                errorMessage += 'Session expired. Please refresh the page and try again.';
+            } else if (error.response.status === 403) {
+                errorMessage += 'You do not have permission to toggle the AI system.';
+            } else {
+                errorMessage += error.response.data.message || 'Please try again.';
+            }
+        } else {
+            errorMessage += 'Network error. Please check your connection.';
+        }
+        
+        alert(errorMessage);
         toggle.disabled = false;
     });
 }
@@ -367,12 +521,83 @@ function toggleAISystem(enabled) {
 setInterval(() => {
     axios.get('{{ route("ai.control.health") }}')
         .then(response => {
-            console.log('Health check:', response.data);
+            console.log('💚 Health check:', response.data);
             // Optional: Update health indicators without page reload
         })
         .catch(error => {
-            console.error('Health check failed:', error);
+            console.error('❌ Health check failed:', error);
         });
 }, 30000);
+
+// Change AI provider
+function changeAIProvider(provider) {
+    const select = document.getElementById('aiProviderSelect');
+    select.disabled = true;
+
+    axios.post('{{ route("ai.control.setProvider") }}', {
+        provider: provider
+    })
+    .then(response => {
+        if (response.data.success) {
+            console.log('✅ ' + response.data.message);
+            // Reload page to apply changes
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Provider change failed:', error);
+        
+        // Display error message
+        let errorMessage = 'Failed to change AI provider. ';
+        
+        if (error.response) {
+            if (error.response.status === 419) {
+                errorMessage += 'Session expired. Please refresh the page and try again.';
+            } else if (error.response.status === 403) {
+                errorMessage += 'You do not have permission to change AI provider.';
+            } else {
+                errorMessage += error.response.data.message || 'Please try again.';
+            }
+        } else {
+            errorMessage += 'Network error. Please check your connection.';
+        }
+        
+        alert(errorMessage);
+        select.disabled = false;
+        // Revert selection
+        location.reload();
+    });
+}
+
+// Settings Form Handler
+const settingsForm = document.getElementById('settingsForm');
+if (settingsForm) {
+    settingsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('saveSettingsBtn');
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+        const formData = new FormData(this);
+        
+        try {
+            const response = await axios.post('{{ route("ai.settings.update") }}', formData);
+            
+            if (response.data.success) {
+                toastr.success(response.data.message || 'Settings updated successfully');
+            }
+        } catch (error) {
+            console.error('Save failed:', error);
+            toastr.error(error.response?.data?.message || 'Failed to update settings');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+}
 </script>
 @endsection

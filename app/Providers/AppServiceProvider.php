@@ -15,19 +15,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Register AIGateway as singleton with automatic provider selection
         $this->app->singleton(\App\Services\AI\AIGateway::class, function ($app) {
             $gateway = new \App\Services\AI\AIGateway();
             
-            if (config('ai.enabled')) {
-                // Determine provider based on config
-                $provider = config('ai.provider', 'openai');
-                
-                if ($provider === 'openai' && config('ai.openai.api_key')) {
-                    $gateway->setProvider(new \App\Services\AI\Providers\OpenAIProvider(
-                        config('ai.openai.api_key'),
-                        config('ai.openai.model', 'gpt-4')
-                    ));
-                }
+            // Use factory to create provider based on configuration
+            $provider = \App\Services\AI\AIProviderFactory::create();
+            
+            if ($provider) {
+                $gateway->setProvider($provider);
             }
             
             return $gateway;

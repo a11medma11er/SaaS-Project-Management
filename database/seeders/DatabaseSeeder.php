@@ -8,14 +8,21 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        // Run seeders in order
+        // Essential seeders (always run)
         $this->call([
             RolesAndPermissionsSeeder::class,
             AIPermissionsSeeder::class,
             DefaultUserSeeder::class,
-            DemoDataSeeder::class, // Demo data with projects, tasks, etc.
         ]);
 
-        $this->command->info('All seeders completed successfully!');
+        // Demo data seeder (only run if enabled via environment variable)
+        if (env('SEED_DEMO_DATA', false)) {
+            $this->command->info('🎭 Seeding demo data...');
+            $this->call(DemoDataSeeder::class);
+        } else {
+            $this->command->warn('⚠️  Demo data seeding skipped (SEED_DEMO_DATA=false)');
+        }
+
+        $this->command->info('✅ All seeders completed successfully!');
     }
 }

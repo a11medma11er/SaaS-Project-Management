@@ -91,6 +91,90 @@ class AIIntegrationService
     }
 
     /**
+     * Google Gemini integration
+     */
+    protected function callGemini(string $prompt, array $context): array
+    {
+        $apiKey = config('ai.gemini.api_key');
+        
+        if (!$apiKey) {
+            throw new \Exception('Gemini API key not configured');
+        }
+
+        $model = config('ai.gemini.model', 'gemini-pro');
+        
+        $response = Http::timeout(30)->post(
+            "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}",
+            [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.7,
+                    'maxOutputTokens' => 1024,
+                ],
+            ]
+        );
+
+        if ($response->failed()) {
+            throw new \Exception('Gemini API request failed: ' . $response->body());
+        }
+
+        $data = $response->json();
+        $content = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        return [
+            'provider' => 'gemini',
+            'response' => $content,
+            'model' => $model,
+            'usage' => $data['usageMetadata'] ?? [],
+        ];
+    }
+
+    /**
+     * OpenRouter integration
+     */
+    protected function callOpenrouter(string $prompt, array $context): array
+    {
+        $apiKey = config('ai.openrouter.api_key');
+        
+        if (!$apiKey) {
+            throw new \Exception('OpenRouter API key not configured');
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$apiKey}",
+            'HTTP-Referer' => config('ai.openrouter.site_url', config('app.url')),
+            'X-Title' => config('ai.openrouter.app_name', config('app.name')),
+        ])->timeout(30)->post('https://openrouter.ai/api/v1/chat/completions', [
+            'model' => config('ai.openrouter.model', 'openai/gpt-4'),
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
+                ],
+            ],
+        ]);
+
+        if ($response->failed()) {
+            throw new \Exception('OpenRouter API request failed: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return [
+            'provider' => 'openrouter',
+            'response' => $data['choices'][0]['message']['content'] ?? '',
+            'model' => $data['model'] ?? config('ai.openrouter.model'),
+            'usage' => $data['usage'] ?? [],
+        ];
+    }
+
+    /**
      * Claude (Anthropic) integration
      */
     protected function callClaude(string $prompt, array $context): array
@@ -270,12 +354,14 @@ class AIIntegrationService
      */
     public function getIntegrationHealth(): array
     {
-        $providers = ['openai', 'claude', 'local'];
+        $providers = ['openai', 'gemini', 'openrouter', 'claude', 'local'];
         $health = [];
 
         foreach ($providers as $provider) {
+            $isConfigured = $provider === 'local' ? true : !empty(config("ai.{$provider}.api_key"));
+            
             $health[$provider] = [
-                'configured' => !empty(config("ai.{$provider}.api_key")),
+                'configured' => $isConfigured,
                 'rate_limited' => !$this->checkRateLimit($provider),
                 'last_call' => Cache::get("ai_last_call_{$provider}"),
             ];

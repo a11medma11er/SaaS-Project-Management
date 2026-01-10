@@ -243,6 +243,80 @@
             </div>
         </div>
     </div>
+
+    <!-- AI Insights Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-soft-warning">
+                    <h4 class="card-title mb-0">
+                        <i class="ri-lightbulb-flash-line text-warning"></i> AI Insights & Recent Activity
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Related To</th>
+                                    <th>Recommendation</th>
+                                    <th>Confidence</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($insights['recent_decisions'] ?? [] as $decision)
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-soft-primary text-primary">
+                                            {{ ucfirst(str_replace('_', ' ', $decision->decision_type)) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($decision->task)
+                                            <i class="ri-task-line"></i> {{ Str::limit($decision->task->title, 25) }}
+                                        @elseif($decision->project)
+                                            <i class="ri-folder-3-line"></i> {{ Str::limit($decision->project->title, 25) }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{ Str::limit($decision->recommendation, 40) }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 8px; width: 60px;">
+                                            <div class="progress-bar bg-{{ $decision->confidence_score >= 0.7 ? 'success' : ($decision->confidence_score >= 0.5 ? 'warning' : 'danger') }}" 
+                                                 style="width: {{ $decision->confidence_score * 100 }}%"></div>
+                                        </div>
+                                        <small>{{ number_format($decision->confidence_score * 100) }}%</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 
+                                            $decision->user_action === 'accepted' ? 'success' : 
+                                            ($decision->user_action === 'rejected' ? 'danger' : 
+                                            ($decision->user_action === 'modified' ? 'info' : 'warning')) 
+                                        }}">
+                                            {{ ucfirst($decision->user_action) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small">{{ $decision->created_at->diffForHumans() }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        No recent decisions found
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 

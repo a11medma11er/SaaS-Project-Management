@@ -39,6 +39,7 @@ Route::prefix('admin/ai')
         Route::middleware(['can:access-ai-control'])->group(function () {
             Route::get('/control', [AIControlController::class, 'index'])->name('control.index');
             Route::post('/control/toggle', [AIControlController::class, 'toggle'])->name('control.toggle');
+            Route::post('/control/set-provider', [AIControlController::class, 'setProvider'])->name('control.setProvider');
             Route::get('/control/health', [AIControlController::class, 'health'])->name('control.health');
         });
 
@@ -46,9 +47,10 @@ Route::prefix('admin/ai')
         // AI Settings Management
         // ============================================
         Route::middleware(['can:manage-ai-settings'])->group(function () {
-            Route::get('/settings', [AIControlController::class, 'settings'])->name('settings.index');
+            // Settings are now a tab in Control Panel, only keep update endpoint
             Route::post('/settings', [AIControlController::class, 'updateSettings'])->name('settings.update');
         });
+
 
         // ============================================
         // AI Prompts Management

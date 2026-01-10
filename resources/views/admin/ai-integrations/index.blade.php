@@ -87,9 +87,11 @@
                         <div class="mb-3">
                             <label class="form-label">Provider</label>
                             <select class="form-select" name="provider" required>
-                                <option value="local">Local (Rule-based)</option>
-                                <option value="openai">OpenAI</option>
-                                <option value="claude">Claude (Anthropic)</option>
+                                <option value="local">🏠 Local (Rule-based)</option>
+                                <option value="openai">🤖 OpenAI</option>
+                                <option value="gemini">✨ Google Gemini</option>
+                                <option value="openrouter">🌐 OpenRouter</option>
+                                <option value="claude">🧠 Claude (Anthropic)</option>
                             </select>
                         </div>
 
@@ -191,6 +193,14 @@
                     <pre class="bg-light p-3 rounded"><code># OpenAI
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_MODEL=gpt-4
+
+# Google Gemini
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-pro
+
+# OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_MODEL=openai/gpt-4
 
 # Claude (Anthropic)
 CLAUDE_API_KEY=your_claude_api_key

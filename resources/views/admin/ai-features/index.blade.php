@@ -177,7 +177,7 @@ document.getElementById('devPlanForm').addEventListener('submit', async function
         });
         
         if (response.data.success) {
-            showResults('Development Plan', formatDevPlan(response.data.plan));
+            showResults('Development Plan', formatDevPlan(response.data.plan, response.data.ai_info));
         }
     } catch (error) {
         toastr.error('Failed to generate plan');
@@ -247,8 +247,19 @@ function showResults(title, content) {
 }
 
 // Format development plan
-function formatDevPlan(plan) {
+function formatDevPlan(plan, aiInfo) {
     let html = '<div class="ai-results">';
+    
+    // Show AI Provider Info
+    if (aiInfo) {
+        html += '<div class="alert alert-info mb-3">';
+        html += '<strong>🤖 AI Provider:</strong> ' + (aiInfo.provider || 'Unknown');
+        if (aiInfo.model) {
+            html += ' <span class="badge bg-primary">' + aiInfo.model + '</span>';
+        }
+        html += '</div>';
+    }
+    
     html += `<h5>${plan.overview.title}</h5>`;
     html += `<p class="text-muted">${plan.overview.summary}</p>`;
     html += `<div class="row mb-3">`;

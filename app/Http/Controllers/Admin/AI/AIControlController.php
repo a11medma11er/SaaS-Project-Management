@@ -25,8 +25,16 @@ class AIControlController extends Controller
      */
     public function index()
     {
+        // Fetch settings grouped by category for Settings tab
+        $settings = [
+            'general' => \App\Models\AI\AISetting::where('group', 'general')->get(),
+            'safety' => \App\Models\AI\AISetting::where('group', 'safety')->get(),
+            'performance' => \App\Models\AI\AISetting::where('group', 'performance')->get(),
+        ];
+
         $data = [
             'ai_enabled' => $this->aiSettings->get('ai_enabled', false),
+            'ai_provider' => $this->aiSettings->get('ai_provider', config('ai.default_provider', 'local')),
             'total_decisions' => AIDecision::count(),
             'pending_decisions' => AIDecision::pending()->count(),
             'acceptance_rate' => $this->aiMetrics->getAcceptanceRate(),
@@ -36,6 +44,7 @@ class AIControlController extends Controller
                 ->take(10)
                 ->get(),
             'system_health' => $this->aiMetrics->getSystemHealth(),
+            'settings' => $settings, // Add settings data
         ];
 
         return view('admin.ai-control.index', $data);
@@ -87,20 +96,6 @@ class AIControlController extends Controller
     }
 
     /**
-     * Display settings page
-     */
-    public function settings()
-    {
-        $settings = [
-            'general' => $this->aiSettings->getByGroup('general'),
-            'safety' => $this->aiSettings->getByGroup('safety'),
-            'performance' => $this->aiSettings->getByGroup('performance'),
-        ];
-
-        return view('admin.ai-control.settings', compact('settings'));
-    }
-
-    /**
      * Update AI settings
      */
     public function updateSettings(Request $request)
@@ -131,6 +126,40 @@ class AIControlController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'AI settings updated successfully.',
+        ]);
+    }
+
+    /**
+     * Set AI provider
+     */
+    public function setProvider(Request $request)
+    {
+        $request->validate([
+            'provider' => 'required|in:openai,gemini,openrouter,claude,local',
+        ]);
+
+        $provider = $request->input('provider');
+        
+        $this->aiSettings->set('ai_provider', $provider, 'string', 'Selected AI provider');
+        
+        // Log the provider change
+        activity('ai')
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'provider' => $provider,
+                'ip' => $request->ip(),
+            ])
+            ->log('ai_provider_changed');
+
+        Log::info('AI provider changed to ' . $provider . ' by user ' . auth()->id());
+
+        // Clear config cache to apply changes
+        \Artisan::call('config:clear');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'AI provider changed to ' . $provider . ' successfully.',
+            'provider' => $provider,
         ]);
     }
 }

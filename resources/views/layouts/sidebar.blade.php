@@ -182,8 +182,8 @@
                             @endcan
                             @can('view-ai-analytics')
                             <li class="nav-item">
-                                <a href="{{ route('ai.insights.index') }}" class="nav-link">
-                                    <i class="ri-lightbulb-flash-line me-1"></i> Insights
+                                <a href="{{ route('ai.analytics.index') }}" class="nav-link">
+                                    <i class="ri-bar-chart-line me-1"></i> Analytics & Insights
                                 </a>
                             </li>
                             @endcan
@@ -226,12 +226,8 @@
                                     <i class="ri-magic-line me-1"></i> AI Features
                                 </a>
                             </li>
+
                             @can('manage-ai-settings')
-                            <li class="nav-item">
-                                <a href="{{ route('ai.settings.index') }}" class="nav-link">
-                                    <i class="ri-settings-3-line me-1"></i> Settings
-                                </a>
-                            </li>
                             <li class="nav-item">
                                 <a href="{{ route('ai.guardrails.index') }}" class="nav-link">
                                     <i class="ri-shield-check-line me-1"></i> Guardrails

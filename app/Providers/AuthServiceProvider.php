@@ -25,6 +25,38 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // AI Permissions - Use Spatie's permission system
+        // Admin users automatically have all permissions
+        Gate::define('access-ai-control', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('access-ai-control');
+        });
+
+        Gate::define('manage-ai-settings', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('manage-ai-settings');
+        });
+
+        Gate::define('manage-ai-prompts', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('manage-ai-prompts');
+        });
+
+        Gate::define('test-ai-prompts', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('test-ai-prompts');
+        });
+
+        Gate::define('view-ai-decisions', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('view-ai-decisions');
+        });
+
+        Gate::define('approve-ai-actions', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('approve-ai-actions');
+        });
+
+        Gate::define('view-ai-analytics', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('view-ai-analytics');
+        });
+
+        Gate::define('manage-ai-safety', function ($user) {
+            return $user->hasRole('admin') || $user->hasPermissionTo('manage-ai-safety');
+        });
     }
 }
