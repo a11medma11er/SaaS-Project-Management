@@ -23,10 +23,18 @@ class AIWorkflowController extends Controller
     {
         $activeRules = $this->automationService->getActiveRules();
         $workloadBalance = $this->automationService->balanceWorkload();
+        
+        // Fetch Scheduled Jobs
+        $scheduledJobs = \App\Models\AI\AISchedule::orderBy('run_at', 'desc')->limit(10)->get();
+        
+        // Get Workload Threshold
+        $threshold = (int) (\App\Models\AI\AISetting::where('key', 'workload_threshold')->value('value') ?? 5);
 
         return view('admin.ai-workflows.index', compact(
             'activeRules',
-            'workloadBalance'
+            'workloadBalance',
+            'scheduledJobs',
+            'threshold'
         ));
     }
 
@@ -139,5 +147,29 @@ class AIWorkflowController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+    /**
+     * Update workload threshold
+     */
+    public function updateWorkloadThreshold(Request $request)
+    {
+        $request->validate([
+            'threshold' => 'required|integer|min:1|max:50',
+        ]);
+
+        \App\Models\AI\AISetting::updateOrCreate(
+            ['key' => 'workload_threshold'],
+            [
+                'value' => $request->threshold,
+                'type' => 'integer',
+                'group' => 'system',
+                'description' => 'Max tasks per user before flag'
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Threshold updated successfully'
+        ]);
     }
 }

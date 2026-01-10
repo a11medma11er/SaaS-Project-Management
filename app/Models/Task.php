@@ -94,6 +94,12 @@ class Task extends Model
         return $this->hasMany(\App\Models\AI\AIDecision::class);
     }
 
+    public function dependencies()
+    {
+        return $this->belongsToMany(Task::class, 'task_dependencies', 'task_id', 'dependency_id')
+            ->withTimestamps();
+    }
+
     // Scopes
     public function scopeStatus($query, $status)
     {

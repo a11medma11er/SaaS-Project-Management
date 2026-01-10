@@ -51,6 +51,11 @@ class AIAutomationService
             $projects = $this->checkProjectHealth();
             $results['tasks_analyzed'] += count($projects);
             
+            // 5. Check CUSTOM rules
+            $customStats = $this->checkCustomRules();
+            $results['tasks_analyzed'] += $customStats['analyzed'];
+            $results['decisions_created'] += $customStats['decisions'];
+            
             Log::info('AI Automation completed', $results);
             
         } catch (\Exception $e) {
@@ -132,7 +137,7 @@ class AIAutomationService
      */
     protected function checkResourceAllocation(): array
     {
-        $tasks = Task::whereNull('assigned_to')
+        $tasks = Task::doesntHave('assignedUsers')
             ->where('status', 'pending')
             ->where('priority', 'high')
             ->limit(5)
@@ -227,19 +232,19 @@ class AIAutomationService
     /**
      * Schedule AI analysis for specific time
      */
+    /**
+     * Schedule AI analysis for specific time (Database Backed)
+     */
     public function scheduleAnalysis(string $type, array $params, Carbon $runAt): void
     {
-        // Store in cache or database
-        $scheduleKey = "ai_schedule_{$type}_" . $runAt->timestamp;
-        
-        Cache::put($scheduleKey, [
+        \App\Models\AI\AISchedule::create([
             'type' => $type,
             'params' => $params,
-            'run_at' => $runAt->toIso8601String(),
-            'status' => 'pending',
-        ], $runAt->diffInMinutes(now()) + 60);
+            'run_at' => $runAt,
+            'status' => 'pending'
+        ]);
 
-        Log::info('AI analysis scheduled', [
+        Log::info('AI analysis scheduled (DB)', [
             'type' => $type,
             'run_at' => $runAt->toDateTimeString(),
         ]);
@@ -252,12 +257,52 @@ class AIAutomationService
     {
         $results = [];
         
-        // Get all scheduled analyses (from cache or database)
-        // This is simplified - in production, use database
-        
+        // Get all pending scheduled analyses that are due
+        $schedules = \App\Models\AI\AISchedule::where('status', 'pending')
+            ->where('run_at', '<=', now())
+            ->get();
+            
+        foreach ($schedules as $schedule) {
+            try {
+                // Mark as processing
+                $schedule->update(['status' => 'processing']);
+                
+                // Execute Logic based on type
+                $output = [];
+                
+                if ($schedule->type === 'automation_run') {
+                    $output = $this->runAutomatedAnalysis();
+                } else {
+                    // Placeholder for other types (e.g., reports)
+                    $output = ['message' => "Executed {$schedule->type}"];
+                }
+                
+                // Mark as completed
+                $schedule->update([
+                    'status' => 'completed',
+                    'completed_at' => now(),
+                    'output' => $output
+                ]);
+                
+                $results[] = "Executed Schedule #{$schedule->id}: {$schedule->type}";
+                
+            } catch (\Exception $e) {
+                // Mark as failed
+                $schedule->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage()
+                ]);
+                
+                Log::error("Scheduled AI job #{$schedule->id} failed", ['error' => $e->getMessage()]);
+            }
+        }
+
         return $results;
     }
 
+    /**
+     * Create automation rule
+     */
     /**
      * Create automation rule
      */
@@ -265,17 +310,12 @@ class AIAutomationService
     {
         $validatedRule = $this->validateRule($rule);
         
-        // Store rule (cache or database)
-        $ruleId = 'rule_' . time();
+        // Store rule in database
+        $newRule = \App\Models\AI\AutomationRule::create($validatedRule);
         
-        Cache::put("automation_rule_{$ruleId}", $validatedRule, now()->addYear());
+        Log::info('Automation rule created', ['rule_id' => $newRule->id]);
         
-        Log::info('Automation rule created', ['rule_id' => $ruleId]);
-        
-        return [
-            'id' => $ruleId,
-            'rule' => $validatedRule,
-        ];
+        return $newRule->toArray();
     }
 
     /**
@@ -292,11 +332,12 @@ class AIAutomationService
         }
 
         return [
-            'trigger' => $rule['trigger'], // 'task_created', 'deadline_approaching', etc.
-            'conditions' => $rule['conditions'], // Array of conditions
-            'action' => $rule['action'], // 'analyze', 'notify', 'auto_execute'
+            'name' => $rule['name'] ?? 'Untitled Rule',
+            'trigger' => $rule['trigger'], 
+            'conditions' => $rule['conditions'],
+            'action' => $rule['action'],
             'enabled' => $rule['enabled'] ?? true,
-            'created_at' => now()->toIso8601String(),
+            'is_active' => $rule['enabled'] ?? true,
         ];
     }
 
@@ -305,8 +346,184 @@ class AIAutomationService
      */
     public function getActiveRules(): array
     {
-        // In production, fetch from database
-        return [];
+        return \App\Models\AI\AutomationRule::where('is_active', true)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Evaluate custom rules for a task
+     */
+    /**
+     * Check valid custom rules against active tasks
+     */
+    protected function checkCustomRules(): array
+    {
+        $stats = ['analyzed' => 0, 'decisions' => 0];
+        
+        // Get active tasks (pending/in_progress)
+        $tasks = Task::whereIn('status', ['pending', 'in_progress'])
+            ->with(['assignedUsers', 'project'])
+            ->limit(20) // Batch size for safety
+            ->get();
+            
+        $stats['analyzed'] = $tasks->count();
+        
+        foreach ($tasks as $task) {
+            if ($this->evaluateCustomRules($task)) {
+                $stats['decisions']++;
+            }
+        }
+        
+        return $stats;
+    }
+
+    /**
+     * Evaluate custom rules for a task
+     */
+    /**
+     * Evaluate custom rules for a task
+     */
+    protected function evaluateCustomRules(Task $task): bool
+    {
+        $rules = $this->getActiveRules();
+        $decisionCreated = false;
+        
+        foreach ($rules as $rule) {
+            $conditions = $rule['conditions'];
+            $met = false;
+            
+            // Generic Logic Interpreter
+            if (isset($conditions['field'])) {
+                $field = $conditions['field'];
+                $operator = $conditions['operator'] ?? '=';
+                $value = $conditions['value'];
+                $actualValue = null;
+
+                // 1. Determine Actual Value
+                if ($field === 'assigned_users_count') {
+                    $actualValue = $task->assignedUsers()->count();
+                } elseif ($field === 'days_until_due') {
+                    $actualValue = $task->due_date ? now()->diffInDays($task->due_date, false) : 0;
+                } elseif ($field === 'days_overdue') {
+                    $actualValue = ($task->due_date && $task->due_date < now()) ? now()->diffInDays($task->due_date) : 0;
+                } elseif (str_contains($field, '.')) {
+                    // Support Dot Notation for Relations (e.g., 'project.status', 'owner.name')
+                    // Support Collection Wildcard (e.g., 'assignedUsers.*.avatar')
+                    
+                    if (str_contains($field, '.*.')) {
+                        // Collection Logic: Check if ANY item in collection matches
+                        [$relation, $subField] = explode('.*.', $field, 2);
+                        
+                        // Resolve relation (e.g., assignedUsers)
+                        $collection = $task->$relation ?? null;
+                        
+                        if ($collection instanceof \Illuminate\Database\Eloquent\Collection) {
+                            // Check if ANY item matches the condition directly here
+                            // We need to bypass the standard switch below for collections
+                            $hasMatch = $collection->contains(function ($item) use ($subField, $operator, $value) {
+                                $itemValue = $item->getAttribute($subField);
+                                
+                                // Handle NULL string input
+                                if ($value === 'NULL') $value = null;
+
+                                switch ($operator) {
+                                    case '=': return $itemValue == $value;
+                                    case '!=': return $itemValue != $value;
+                                    default: return false; 
+                                }
+                            });
+                            
+                            if ($hasMatch) {
+                                $met = true;
+                                $actualValue = "Match found in collection";
+                                goto skip_standard_comparison;
+                            }
+                        }
+                    } else {
+                        // Standard Dot Notation (Single Object)
+                        $parts = explode('.', $field);
+                        $current = $task;
+                        $valid = true;
+                        
+                        foreach ($parts as $part) {
+                            if ($current && (is_array($current) || $current instanceof \ArrayAccess)) {
+                                $current = $current[$part] ?? null;
+                            } elseif ($current && is_object($current)) {
+                                $current = $current->$part ?? null;
+                            } else {
+                                $valid = false;
+                                break;
+                            }
+                        }
+                        $actualValue = $valid ? $current : null;
+                    }
+                } else {
+                    // Start by checking simple attributes
+                    $actualValue = $task->getAttribute($field);
+                }
+
+                // Handle string "NULL" as actual null
+                if ($value === 'NULL') $value = null;
+
+                // 2. Compare (Standard Logic)
+                switch ($operator) {
+                    case '>':
+                        $met = $actualValue > $value;
+                        break;
+                    case '<':
+                        $met = $actualValue < $value;
+                        break;
+                    case '>=':
+                        $met = $actualValue >= $value;
+                        break;
+                    case '<=':
+                        $met = $actualValue <= $value;
+                        break;
+                    case '=':
+                    case '==':
+                        $met = $actualValue == $value;
+                        break;
+                    case '!=':
+                        $met = $actualValue != $value;
+                        break;
+                    case 'IN':
+                        $met = in_array($actualValue, (array)$value);
+                        break;
+                }
+                
+                skip_standard_comparison:
+            }
+            
+            if ($met) {
+                try {
+                    // Rule Matched! Create Decision
+                    $this->decisionEngine->createDecision(
+                        'rule_triggered',
+                        $task->id,
+                        $task->project_id,
+                        "Custom Rule: {$rule['name']}",
+                        [
+                            "Rule '{$rule['name']}' triggered",
+                            "Condition: {$field} {$operator} {$value}",
+                            "Actual Value: " . (is_array($actualValue) ? json_encode($actualValue) : $actualValue)
+                        ],
+                        0.95,
+                        [$rule['action']]
+                    );
+                    
+                    // Update rule stats
+                    \App\Models\AI\AutomationRule::find($rule['id'])
+                        ->update(['last_triggered_at' => now()]);
+                        
+                    $decisionCreated = true;
+                } catch (\Exception $e) {
+                    Log::error("Failed to execute custom rule {$rule['id']}", ['error' => $e->getMessage()]);
+                }
+            }
+        }
+        
+        return $decisionCreated;
     }
 
     /**
@@ -319,16 +536,19 @@ class AIAutomationService
         })->get();
 
         $recommendations = [];
+        
+        // Get configurable threshold
+        $threshold = (int) (\App\Models\AI\AISetting::where('key', 'workload_threshold')->value('value') ?? 5);
 
         foreach ($users as $user) {
             $activeTasks = $user->tasks()->where('status', '!=', 'completed')->count();
             
-            if ($activeTasks > 5) {
+            if ($activeTasks > $threshold) {
                 $recommendations[] = [
                     'user_id' => $user->id,
                     'user_name' => $user->name,
                     'active_tasks' => $activeTasks,
-                    'recommendation' => 'Consider redistributing tasks',
+                    'recommendation' => "Consider redistributing tasks (Threshold: >{$threshold})",
                 ];
             }
         }

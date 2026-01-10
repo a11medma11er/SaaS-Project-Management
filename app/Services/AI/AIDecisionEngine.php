@@ -29,9 +29,11 @@ class AIDecisionEngine
     /**
      * Analyze task and generate decision
      */
-    public function analyzeTask(int $taskId): ?AIDecision
+    public function analyzeTask(Task $task, ?string $decisionType = null): ?AIDecision
     {
         try {
+            $taskId = $task->id;
+            
             // Get enriched task context
             $context = $this->contextBuilder->buildDecisionContext($taskId);
             
@@ -351,7 +353,7 @@ class AIDecisionEngine
     /**
      * Create AI decision record
      */
-    protected function createDecision(
+    public function createDecision(
         string $type,
         ?int $taskId,
         ?int $projectId,

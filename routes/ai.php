@@ -120,6 +120,7 @@ Route::prefix('admin/ai')
             Route::post('/workflows/create-rule', [AIWorkflowController::class, 'createRule'])->name('workflows.create-rule');
             Route::post('/workflows/schedule', [AIWorkflowController::class, 'scheduleAnalysis'])->name('workflows.schedule');
             Route::get('/workflows/workload', [AIWorkflowController::class, 'workloadBalance'])->name('workflows.workload');
+            Route::post('/workflows/update-threshold', [AIWorkflowController::class, 'updateWorkloadThreshold'])->name('workflows.update-threshold');
         });
 
         // ============================================
