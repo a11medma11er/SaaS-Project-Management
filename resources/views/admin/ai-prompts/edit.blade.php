@@ -3,6 +3,7 @@
 @section('title') Edit {{ $prompt->name }} @endsection
 
 @section('css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
 @endsection
@@ -68,6 +69,40 @@
                             @enderror
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="category_id" class="form-label">Category</label>
+                                    <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
+                                        <option value="">No Category</option>
+                                        @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ old('category_id', $prompt->category_id) == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">Tags</label>
+                                    <select class="form-select select2-tags @error('tags') is-invalid @enderror" id="tags" name="tags[]" multiple>
+                                        @foreach($tags as $tag)
+                                        <option value="{{ $tag->id }}" {{ in_array($tag->id, old('tags', $prompt->tags->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                            {{ $tag->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @error('tags')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="version_type" class="form-label">Version Increment <span class="text-danger">*</span></label>
                             <select class="form-select @error('version_type') is-invalid @enderror" id="version_type" name="version_type" required>
@@ -100,9 +135,17 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/markdown/markdown.min.js"></script>
 <script>
+// Initialize Select2
+$('.select2-tags').select2({
+    placeholder: 'Select tags...',
+    allowClear: true,
+    width: '100%'
+});
+
 let editor = CodeMirror.fromTextArea(document.getElementById('template'), {
     mode: 'markdown',
     theme: 'monokai',
@@ -126,7 +169,10 @@ function updateVariables() {
     }
 }
 
-editor.on('change', updateVariables);
-updateVariables();
+// Sync CodeMirror with textarea on every change
+editor.on('change', function() {
+    updateVariables();
+    document.getElementById('template').value = editor.getValue();
+});
 </script>
 @endsection

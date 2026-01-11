@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Log;
 class AIGateway
 {
     private ?AIProvider $provider = null;
+    private AIPromptHelper $promptHelper;
+    
+    public function __construct(AIPromptHelper $promptHelper)
+    {
+        $this->promptHelper = $promptHelper;
+    }
     
     /**
      * Set AI provider (optional)
@@ -26,29 +32,42 @@ class AIGateway
     /**
      * Get AI suggestion with graceful degradation
      * 
-     * @param string $type Suggestion type (e.g., 'priority', 'assignment', 'deadline')
-     * @param array $context Decision context
+     * @param string $promptName System prompt name (e.g., 'ai_feature_development_plan')
+     * @param array $variables Variables to compile into the prompt template
      * @return array|null Returns null if AI unavailable or fails
      */
-    public function suggest(string $type, array $context): ?array
+    public function suggest(string $promptName, array $variables = []): ?array
     {
-        // If AI is disabled or not configured, return null gracefully
-        if (!$this->provider || !$this->provider->isAvailable()) {
-            Log::info('AI suggestion skipped - provider not available', [
-                'type' => $type,
-            ]);
-            return null;
-        }
-        
         try {
+            // Get compiled prompt from database
+            $compiledPrompt = $this->promptHelper->compilePrompt($promptName, $variables);
+            
+            if (!$compiledPrompt) {
+                Log::warning("System prompt '{$promptName}' not found", [
+                    'prompt' => $promptName,
+                    'variables_count' => count($variables),
+                ]);
+                return null;
+            }
+
+            // If AI is disabled or not configured, return null gracefully
+            if (!$this->provider || !$this->provider->isAvailable()) {
+                Log::info('AI suggestion skipped - provider not available', [
+                    'prompt' => $promptName,
+                ]);
+                return null;
+            }
+            
+            // Send to AI provider
             $suggestion = $this->provider->getSuggestion([
-                'type' => $type,
-                'context' => $context,
+                'prompt' => $compiledPrompt,
+                'type' => $promptName,
+                'context' => $variables,
             ]);
             
             if ($suggestion) {
-                Log::info('AI suggestion generated', [
-                    'type' => $type,
+                Log::info('AI suggestion generated successfully', [
+                    'prompt' => $promptName,
                     'suggestion_id' => $suggestion['id'] ?? 'unknown',
                 ]);
             }
@@ -58,7 +77,7 @@ class AIGateway
         } catch (\Exception $e) {
             // AI failure should NEVER break the system
             Log::warning('AI suggestion failed - gracefully degrading', [
-                'type' => $type,
+                'prompt' => $promptName,
                 'error' => $e->getMessage(),
             ]);
             

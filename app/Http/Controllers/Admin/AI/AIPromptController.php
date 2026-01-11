@@ -22,7 +22,18 @@ class AIPromptController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AIPrompt::query();
+        $query = AIPrompt::with(['category', 'tags', 'creator']);
+
+        // Filter by category
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->where('category_id', $request->category);
+        }
+
+        // Filter by tags
+        if ($request->has('tags') && !empty($request->tags)) {
+            $tagIds = is_array($request->tags) ? $request->tags : [$request->tags];
+            $query->withTags($tagIds);
+        }
 
         // Filter by type
         if ($request->has('type') && $request->type !== 'all') {
@@ -35,7 +46,7 @@ class AIPromptController extends Controller
         }
 
         // Search
-        if ($request->has('search')) {
+        if ($request->has('search') && $request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
@@ -44,9 +55,14 @@ class AIPromptController extends Controller
 
         $prompts = $query->orderBy('name')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->appends($request->except('page'));
 
-        return view('admin.ai-prompts.index', compact('prompts'));
+        // Get all categories and tags for filters
+        $categories = \App\Models\AI\PromptCategory::active()->ordered()->get();
+        $tags = \App\Models\AI\PromptTag::alphabetical()->get();
+
+        return view('admin.ai-prompts.index', compact('prompts', 'categories', 'tags'));
     }
 
     /**
@@ -54,7 +70,10 @@ class AIPromptController extends Controller
      */
     public function create()
     {
-        return view('admin.ai-prompts.create');
+        $categories = \App\Models\AI\PromptCategory::active()->ordered()->get();
+        $tags = \App\Models\AI\PromptTag::alphabetical()->get();
+        
+        return view('admin.ai-prompts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -65,6 +84,9 @@ class AIPromptController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|regex:/^[a-z0-9_-]+$/',
             'type' => 'required|in:system,user,assistant',
+            'category_id' => 'nullable|exists:prompt_categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:prompt_tags,id',
             'template' => 'required|string',
             'description' => 'nullable|string|max:1000',
         ]);
@@ -86,9 +108,19 @@ class AIPromptController extends Controller
                 $validated['name'],
                 $validated['template'],
                 $variables,
-                $validated['description'],
+                $validated['description'] ?? null,
                 $validated['type']
             );
+
+            // Set category
+            if (!empty($validated['category_id'])) {
+                $prompt->update(['category_id' => $validated['category_id']]);
+            }
+
+            // Sync tags
+            if (!empty($validated['tags'])) {
+                $prompt->tags()->sync($validated['tags']);
+            }
 
             // Log activity
             activity('ai')
@@ -115,7 +147,7 @@ class AIPromptController extends Controller
      */
     public function show(AIPrompt $prompt)
     {
-        $prompt->load('creator');
+        $prompt->load(['creator', 'category', 'tags']);
         
         // Get history
         $history = $this->templateService->getHistory($prompt->name);
@@ -128,7 +160,11 @@ class AIPromptController extends Controller
      */
     public function edit(AIPrompt $prompt)
     {
-        return view('admin.ai-prompts.edit', compact('prompt'));
+        $prompt->load(['category', 'tags']);
+        $categories = \App\Models\AI\PromptCategory::active()->ordered()->get();
+        $tags = \App\Models\AI\PromptTag::alphabetical()->get();
+        
+        return view('admin.ai-prompts.edit', compact('prompt', 'categories', 'tags'));
     }
 
     /**
@@ -139,6 +175,9 @@ class AIPromptController extends Controller
         $validated = $request->validate([
             'template' => 'required|string',
             'description' => 'nullable|string|max:1000',
+            'category_id' => 'nullable|exists:prompt_categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:prompt_tags,id',
             'version_type' => 'required|in:major,minor,patch',
         ]);
 
@@ -159,9 +198,21 @@ class AIPromptController extends Controller
                 $prompt->name,
                 $validated['template'],
                 $variables,
-                $validated['description'],
+                $validated['description'] ?? null,
                 $prompt->type
             );
+
+            // Set category
+            if (isset($validated['category_id'])) {
+                $newPrompt->update(['category_id' => $validated['category_id']]);
+            }
+
+            // Sync tags
+            if (isset($validated['tags'])) {
+                $newPrompt->tags()->sync($validated['tags']);
+            } else {
+                $newPrompt->tags()->detach();
+            }
 
             // Log activity
             activity('ai')
@@ -192,6 +243,13 @@ class AIPromptController extends Controller
     public function destroy(AIPrompt $prompt)
     {
         try {
+            // PROTECT SYSTEM PROMPTS FROM DELETION
+            if ($prompt->is_system) {
+                return back()->withErrors([
+                    'error' => 'Cannot delete system prompts. System prompts are core to the AI functionality and cannot be removed. You can edit them to create new versions instead.'
+                ]);
+            }
+
             $prompt->delete();
 
             // Log activity

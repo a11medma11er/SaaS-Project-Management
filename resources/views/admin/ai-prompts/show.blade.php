@@ -100,6 +100,31 @@
                         </div>
                     </div>
 
+                    @if($prompt->category)
+                    <div class="mb-3">
+                        <label class="text-muted small">Category</label>
+                        <div>
+                            <span class="badge" style="background: {{ $prompt->category->color }}20; color: {{ $prompt->category->color }}; padding: 0.5rem 0.75rem;">
+                                <i class="{{ $prompt->category->icon }}"></i>
+                                {{ $prompt->category->name }}
+                            </span>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($prompt->tags->count() > 0)
+                    <div class="mb-3">
+                        <label class="text-muted small">Tags</label>
+                        <div>
+                            @foreach($prompt->tags as $tag)
+                            <span class="badge mb-1" style="background: {{ $tag->color }}20; color: {{ $tag->color }}; padding: 0.35rem 0.6rem;">
+                                {{ $tag->name }}
+                            </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="mb-3">
                         <label class="text-muted small">Version</label>
                         <div><code>{{ $prompt->version }}</code></div>
@@ -132,7 +157,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Variables</h5>
                     @foreach($prompt->variables as $variable)
-                    <code class="d-block mb-1">{{{{ $variable }}}}</code>
+                    <code class="d-block mb-1">@{{ '{{' . $variable . '}}' }}</code>
                     @endforeach
                 </div>
             </div>

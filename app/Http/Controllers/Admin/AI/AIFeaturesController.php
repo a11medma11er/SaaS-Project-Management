@@ -49,6 +49,22 @@ class AIFeaturesController extends Controller
             $aiGateway = app(\App\Services\AI\AIGateway::class);
             $modelInfo = $aiGateway->getModelInfo();
             
+            // STORE RESULT IN DATABASE
+            \App\Models\AI\AIGeneratedContent::create([
+                'project_id' => $project->id,
+                'user_id' => auth()->id(),
+                'feature_type' => 'development_plan',
+                'prompt_name' => 'ai_feature_development_plan',
+                'content' => $plan,
+                'metrics' => [ // Optional: metrics logic to be refined
+                    'generated_at' => now(),
+                    'input_tokens' => 0, // Placeholder
+                    'output_tokens' => 0 // Placeholder
+                ],
+                'provider' => $modelInfo['provider'] ?? null,
+                'model' => $modelInfo['model'] ?? null,
+            ]);
+            
             // Log activity
             activity('ai')
                 ->causedBy(auth()->user())
@@ -60,7 +76,7 @@ class AIFeaturesController extends Controller
                 'success' => true,
                 'plan' => $plan,
                 'project' => $project->title,
-                'ai_info' => $modelInfo, // معلومات المزود
+                'ai_info' => $modelInfo,
             ]);
             
         } catch (\Exception $e) {
@@ -103,16 +119,22 @@ class AIFeaturesController extends Controller
      */
     protected function generateDevelopmentPlan(array $context): array
     {
-        // Try AI generation first
-        $aiPlan = $this->aiGateway->suggest('development_plan', ['context' => $context]);
+        // Try AI generation with system prompt
+        $aiPlan = $this->aiGateway->suggest('ai_feature_development_plan', [
+            'project_title' => $context['project_title'],
+            'project_description' => $context['project_description'] ?? 'No description provided',
+            'budget' => $context['budget'] ?? 'Not specified',
+            'deadline' => $context['deadline'] ?? 'Not specified',
+            'team_size' => $context['team_size'],
+            'existing_tasks' => $context['existing_tasks'],
+            'progress' => $context['progress'],
+        ]);
         
         if ($aiPlan && $this->validatePlanStructure($aiPlan)) {
             return $aiPlan;
         }
 
-        // Fallback to simulated generation
-        // In production, this would call an actual AI service
-        
+        // Fallback to simulated generation if AI fails or unavailable
         $phases = $this->generatePhases($context);
         $timeline = $this->generateTimeline($context);
         $resources = $this->generateResourcePlan($context);
@@ -379,11 +401,19 @@ class AIFeaturesController extends Controller
         try {
             $task = Task::with(['project', 'assignedTo'])->findOrFail($request->task_id);
             
-            $aiAnalysis = $this->aiGateway->suggest('task_analysis', ['context' => $task->toArray()]);
+            // Use system prompt for task analysis
+            $aiAnalysis = $this->aiGateway->suggest('ai_feature_task_analysis', [
+                'task_title' => $task->title,
+                'task_description' => $task->description ?? 'No description',
+                'priority' => $task->priority ?? 'medium',
+                'assigned_to' => $task->assignedTo->name ?? 'Unassigned',
+                'due_date' => $task->due_date ?? 'Not set',
+            ]);
 
             if ($aiAnalysis) {
                 $analysis = $aiAnalysis;
             } else {
+                // Fallback
                 $analysis = [
                     'task' => $task->title,
                     'estimated_effort' => $this->estimateEffort($task),
@@ -483,12 +513,24 @@ class AIFeaturesController extends Controller
         try {
             $project = Project::findOrFail($request->project_id);
             
+            $studyAnalysis = $this->generateStudy($project, $request->study_type);
+            
             $study = [
                 'type' => $request->study_type,
                 'project' => $project->title,
-                'analysis' => $this->generateStudy($project, $request->study_type),
+                'analysis' => $studyAnalysis,
                 'generated_at' => now()->toIso8601String(),
             ];
+
+            // STORE RESULT IN DATABASE
+            \App\Models\AI\AIGeneratedContent::create([
+                'project_id' => $project->id,
+                'user_id' => auth()->id(),
+                'feature_type' => $request->study_type . '_study',
+                'prompt_name' => $request->study_type === 'feasibility' ? 'ai_feature_feasibility_study' : ($request->study_type . '_study'),
+                'content' => $study,
+                'metrics' => ['generated_at' => now()],
+            ]);
             
             return response()->json([
                 'success' => true,
@@ -508,23 +550,21 @@ class AIFeaturesController extends Controller
      */
     protected function generateStudy(Project $project, string $type): array
     {
-        // Try to use AI first
-        $aiStudy = $this->aiGateway->suggest($type . '_study', [
-            'context' => [
+        // Map study type to system prompt
+        $promptName = $type === 'feasibility' ? 'ai_feature_feasibility_study' : null;
+        
+        if ($promptName) {
+            $aiStudy = $this->aiGateway->suggest($promptName, [
                 'project_title' => $project->title,
-                'project_description' => $project->description,
-                'project_budget' => $project->budget,
-                'project_deadline' => $project->deadline,
+                'project_description' => $project->description ?? 'No description',
+                'budget' => $project->budget ?? 'Not specified',
+                'timeline' => $project->end_date ?? 'Not specified',
                 'team_size' => $project->members()->count(),
-                'total_tasks' => $project->tasks()->count(),
-                'completed_tasks' => $project->tasks()->where('status', 'completed')->count(),
-                'study_type' => $type,
-            ]
-        ]);
+            ]);
 
-        // If AI returned results, use them
-        if ($aiStudy && isset($aiStudy['analysis'])) {
-            return $aiStudy['analysis'];
+            if ($aiStudy && isset($aiStudy['analysis'])) {
+                return $aiStudy['analysis'];
+            }
         }
 
         // Fallback to template-based studies
@@ -601,6 +641,19 @@ class AIFeaturesController extends Controller
             
             // Generate task breakdown
             $breakdown = $this->generateTaskBreakdown($project, $granularity);
+
+            // STORE RESULT IN DATABASE
+            \App\Models\AI\AIGeneratedContent::create([
+                'project_id' => $project->id,
+                'user_id' => auth()->id(),
+                'feature_type' => 'project_breakdown',
+                'prompt_name' => 'ai_feature_project_breakdown',
+                'content' => $breakdown,
+                'metrics' => [
+                    'granularity' => $granularity,
+                    'generated_at' => now()
+                ],
+            ]);
             
             // Log activity
             activity('ai')
@@ -631,18 +684,19 @@ class AIFeaturesController extends Controller
      */
     protected function generateTaskBreakdown(Project $project, string $granularity): array
     {
-        // Try AI generation first
-        $context = [
-            'project' => $project->toArray(),
-            'granularity' => $granularity
-        ];
-        
-        $aiBreakdown = $this->aiGateway->suggest('project_breakdown', ['context' => $context]);
+        // Use system prompt for project breakdown
+        $aiBreakdown = $this->aiGateway->suggest('ai_feature_project_breakdown', [
+            'project_title' => $project->title,
+            'project_description' => $project->description ?? 'No description',
+            'granularity' => $granularity,
+            'deadline' => $project->end_date ?? 'Not specified',
+        ]);
         
         if ($aiBreakdown && $this->validateBreakdownStructure($aiBreakdown)) {
             return $aiBreakdown;
         }
 
+        // Fallback
         $taskTemplates = $this->getTaskTemplates($granularity);
         $estimatedTasks = [];
         
@@ -771,5 +825,26 @@ class AIFeaturesController extends Controller
     {
         return isset($breakdown['categories'], $breakdown['total_estimated_tasks'])
             && is_array($breakdown['categories']);
+    }
+
+    /**
+     * Get AI generation history for a project
+     */
+    public function getHistory(Request $request, $projectId)
+    {
+        $project = Project::findOrFail($projectId);
+        
+        $history = \App\Models\AI\AIGeneratedContent::where('project_id', $project->id)
+            ->when($request->feature_type, function($query, $type) {
+                return $query->where('feature_type', $type);
+            })
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'history' => $history
+        ]);
     }
 }

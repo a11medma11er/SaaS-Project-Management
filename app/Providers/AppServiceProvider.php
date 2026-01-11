@@ -17,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register AIGateway as singleton with automatic provider selection
         $this->app->singleton(\App\Services\AI\AIGateway::class, function ($app) {
-            $gateway = new \App\Services\AI\AIGateway();
+            // Resolve AIPromptHelper
+            $promptHelper = $app->make(\App\Services\AI\AIPromptHelper::class);
+            
+            $gateway = new \App\Services\AI\AIGateway($promptHelper);
             
             // Use factory to create provider based on configuration
             $provider = \App\Services\AI\AIProviderFactory::create();

@@ -56,12 +56,14 @@ Route::prefix('admin/ai')
         // AI Prompts Management
         // ============================================
         Route::middleware(['can:manage-ai-prompts'])->group(function () {
-            Route::resource('prompts', AIPromptController::class)->except(['show']);
+            Route::resource('prompts', AIPromptController::class);
             Route::post('/prompts/{prompt}/restore', [AIPromptController::class, 'restore'])->name('prompts.restore');
+            Route::post('/prompts/{prompt}/toggle-active', [AIPromptController::class, 'toggleActive'])->name('prompts.toggle-active');
         });
 
         Route::middleware(['can:test-ai-prompts'])->group(function () {
             Route::post('/prompts/{prompt}/test', [AIPromptController::class, 'test'])->name('prompts.test');
+            Route::post('/prompts/quick-test', [AIPromptController::class, 'quickTest'])->name('prompts.quick-test');
         });
 
         // ============================================
@@ -173,6 +175,7 @@ Route::prefix('admin/ai')
             Route::post('/breakdown-project', [AIFeaturesController::class, 'breakdownProject'])->name('features.breakdown');
             Route::post('/create-study', [AIFeaturesController::class, 'createStudy'])->name('features.study');
             Route::post('/analyze-task', [AIFeaturesController::class, 'analyzeTask'])->name('features.task');
+            Route::get('/history/{project}', [AIFeaturesController::class, 'getHistory'])->name('features.history');
         });
 
         // Guardrails Settings

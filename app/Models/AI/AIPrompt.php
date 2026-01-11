@@ -15,6 +15,7 @@ class AIPrompt extends Model
     protected $fillable = [
         'name',
         'type',
+        'category_id',
         'template',
         'version',
         'variables',
@@ -38,6 +39,21 @@ class AIPrompt extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function category()
+    {
+        return $this->belongsTo(PromptCategory::class, 'category_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(
+            PromptTag::class,
+            'prompt_tag_pivot',
+            'ai_prompt_id',
+            'prompt_tag_id'
+        )->withTimestamps();
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -47,6 +63,18 @@ class AIPrompt extends Model
     public function scopeByType($query, $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function scopeByCategory($query, $categoryId)
+    {
+        return $query->where('category_id', $categoryId);
+    }
+
+    public function scopeWithTags($query, array $tagIds)
+    {
+        return $query->whereHas('tags', function ($q) use ($tagIds) {
+            $q->whereIn('prompt_tags.id', $tagIds);
+        });
     }
 
     // Helper Methods
